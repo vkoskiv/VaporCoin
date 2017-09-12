@@ -1,6 +1,8 @@
 @_exported import Vapor
 import Foundation
 
+let state = P2P()
+
 let httpPort = 3003
 let p2pPort = 6262
 
@@ -16,7 +18,6 @@ extension Droplet {
 		post("addPeer") { req in
 			return "test"
 		}
-		
 		
 		//Set up webSockets
 		socket("p2p") { message, webSocket in
@@ -34,6 +35,9 @@ extension Droplet {
 							try test()
 						case "getLatestBlock":
 							//TODO
+							try test()
+						case "getDifficulty":
+						//TODO
 							try test()
 						default:
 							//TODO

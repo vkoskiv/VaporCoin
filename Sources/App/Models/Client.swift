@@ -15,7 +15,6 @@ class Client: Hashable {
 	
 	var currentDifficulty: Int64
 	
-	
 	init() {
 		
 		var pubKey: CryptoKey
