@@ -26,6 +26,11 @@ class Transaction {
 	//TODO: Make sure output isn't greater than input
 	var inputAmount: Int64
 	var outputAmount: Int64
+	
+	var transactionFee: Int64 {
+		return inputAmount - outputAmount
+	}
+	
 	//From and senderpubkey are optional. BlockRewards don't need them.
 	var from: Address? = nil
 	var senderPubKey: Address? = nil //TODO: Keys and generation
@@ -33,7 +38,6 @@ class Transaction {
 	
 	var to: Address
 	var hash: Data
-	
 	
 	init() {
 		self.type = .transaction

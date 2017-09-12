@@ -30,8 +30,8 @@ class State: Hashable {
 		var pubKey: CryptoKey
 		var privKey: CryptoKey
 		do {
-			pubKey = try CryptoKey(path: "/Users/vkoskiv/coinkeys/coinpublic.pem", component: .publicKey)
-			privKey = try CryptoKey(path: "/Users/vkoskiv/coinkeys/coinprivate.pem", component: .privateKey(passphrase:"power"))
+			pubKey = try CryptoKey(path: "/Users/vkoskiv/coinkeys/public.pem", component: .publicKey)
+			privKey = try CryptoKey(path: "/Users/vkoskiv/coinkeys/private.pem", component: .privateKey(passphrase:nil))
 			
 			self.signature = Signature(pub: pubKey, priv: privKey)
 		} catch {
