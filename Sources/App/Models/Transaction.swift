@@ -40,6 +40,9 @@ class Transaction {
 		self.inputAmount = 0
 		self.outputAmount = 0
 		self.from = Address()
+		self.senderPubKey = Address()
+		self.senderSignature = Signature()
+		
 		self.to = Address()
 		self.hash = Data()
 	}

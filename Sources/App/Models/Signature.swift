@@ -6,8 +6,17 @@
 //
 
 import Foundation
+import Signature
 
 class Signature {
+	
+	var pubKey: CryptoKey? = nil
+	var privKey: CryptoKey? = nil
+	
+	init(pub: CryptoKey, priv: CryptoKey) {
+		self.pubKey = pub
+		self.privKey = priv
+	}
 	
 	//TODO
 	func signMessage(msg: Data, priv: Signature) -> Data{

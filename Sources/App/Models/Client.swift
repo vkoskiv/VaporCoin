@@ -6,25 +6,36 @@
 //
 
 import Foundation
+import Signature
 import Vapor
 
 class Client: Hashable {
-	var pubKey: String
+	var signature: Signature? = nil
 	var socket: WebSocket? = nil
 	
 	var currentDifficulty: Int64
 	
 	
 	init() {
-		self.pubKey = ""
+		
+		var pubKey: CryptoKey
+		var privKey: CryptoKey
+		do {
+			pubKey = try CryptoKey(path: "/Users/vkoskiv/coinkeys/coinpublic.pem", component: .publicKey)
+			privKey = try CryptoKey(path: "/Users/vkoskiv/coinkeys/coinprivate.pem", component: .privateKey(passphrase:"power"))
+			
+			self.signature = Signature(pub: pubKey, priv: privKey)
+		} catch {
+			print("Crypto keys not found!")
+		}
 		self.currentDifficulty = 1
 	}
 	
 	var hashValue: Int {
-		return self.pubKey.hashValue
+		return self.hashValue
 	}
 }
 
 func ==(lhs: Client, rhs: Client) -> Bool {
-	return lhs.pubKey.hashValue == rhs.pubKey.hashValue
+	return lhs.hashValue == rhs.hashValue
 }
