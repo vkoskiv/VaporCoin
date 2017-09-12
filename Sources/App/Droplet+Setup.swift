@@ -1,7 +1,7 @@
 @_exported import Vapor
 import Foundation
 
-let state = P2P()
+let state = State()
 
 let httpPort = 3003
 let p2pPort = 6262

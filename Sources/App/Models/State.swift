@@ -1,5 +1,5 @@
 //
-//  Client.swift
+//  State.swift
 //  Bits
 //
 //  Created by Valtteri Koskivuori on 12/09/2017.
@@ -9,13 +9,23 @@ import Foundation
 import Signature
 import Vapor
 
-class Client: Hashable {
+//Current client state
+class State: Hashable {
+	
+	//Connections to other clients
+	var connections: [State: WebSocket]
+	//Pool of pending transactions to be processed
+	var memPool: [Transaction]
+	
 	var signature: Signature? = nil
 	var socket: WebSocket? = nil
 	
 	var currentDifficulty: Int64
 	
 	init() {
+		
+		self.connections = [:]
+		self.memPool = []
 		
 		var pubKey: CryptoKey
 		var privKey: CryptoKey
@@ -33,8 +43,9 @@ class Client: Hashable {
 	var hashValue: Int {
 		return self.hashValue
 	}
+	
 }
 
-func ==(lhs: Client, rhs: Client) -> Bool {
+func ==(lhs: State, rhs: State) -> Bool {
 	return lhs.hashValue == rhs.hashValue
 }

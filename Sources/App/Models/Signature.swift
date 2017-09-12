@@ -18,6 +18,11 @@ class Signature {
 		self.privKey = priv
 	}
 	
+	init() {
+		self.pubKey = nil
+		self.privKey = nil
+	}
+	
 	//TODO
 	func signMessage(msg: Data, priv: Signature) -> Data{
 		//Hash the message and 'encrypt' it
