@@ -20,6 +20,14 @@ extension Droplet {
 		}
 		
 		//Set up webSockets
+		
+		//Special WebSocket for a miner connection
+		socket("miner") { message, webSocket in
+			webSocket.onText = { ws, text in
+				print("Miner msg: " + text)
+			}
+		}
+		
 		socket("p2p") { message, webSocket in
 			webSocket.onText = { ws, text in
 				print("Received message: " + text)
