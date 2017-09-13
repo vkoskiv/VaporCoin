@@ -29,6 +29,8 @@ class State: Hashable {
 	var minerProtocol: MinerProtocol
 	
 	var currentDifficulty: Int64
+	var blocksSinceDifficultyUpdate: Int
+	
 	
 	init() {
 		print("Initializing client state")
@@ -37,10 +39,14 @@ class State: Hashable {
 		self.blockChain = []
 		self.blockChain.append(genesisBlock())
 		self.p2pProtocol = P2PProtocol()
+		self.minerProtocol = MinerProtocol()
+		self.currentDifficulty = 1
+		self.blocksSinceDifficultyUpdate = 1
 		
 		var pubKey: CryptoKey
 		var privKey: CryptoKey
 		do {
+			print("Loading crypto keys")
 			pubKey = try CryptoKey(path: "/Users/vkoskiv/coinkeys/public.pem", component: .publicKey)
 			privKey = try CryptoKey(path: "/Users/vkoskiv/coinkeys/private.pem", component: .privateKey(passphrase:nil))
 			
@@ -48,7 +54,6 @@ class State: Hashable {
 		} catch {
 			print("Crypto keys not found!")
 		}
-		self.currentDifficulty = 1
 	}
 	
 	var hashValue: Int {
