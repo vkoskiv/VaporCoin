@@ -17,7 +17,7 @@ class State: Hashable {
 	//Pool of pending transactions to be processed
 	var memPool: [Transaction]
 	
-	var signature: Signature? = nil
+	var signature: ClientSignature? = nil
 	var socket: WebSocket? = nil
 	
 	var currentDifficulty: Int64
@@ -33,7 +33,7 @@ class State: Hashable {
 			pubKey = try CryptoKey(path: "/Users/vkoskiv/coinkeys/public.pem", component: .publicKey)
 			privKey = try CryptoKey(path: "/Users/vkoskiv/coinkeys/private.pem", component: .privateKey(passphrase:nil))
 			
-			self.signature = Signature(pub: pubKey, priv: privKey)
+			self.signature = ClientSignature(pub: pubKey, priv: privKey)
 		} catch {
 			print("Crypto keys not found!")
 		}
