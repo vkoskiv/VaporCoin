@@ -24,7 +24,9 @@ class State: Hashable {
 	var signature: ClientSignature? = nil
 	var socket: WebSocket? = nil
 	
-	var p2pProtocol: JSONProtocol
+	//TODO: Separate these two into 2 protocol classes
+	var p2pProtocol: P2PProtocol
+	var minerProtocol: MinerProtocol
 	
 	var currentDifficulty: Int64
 	
@@ -34,7 +36,7 @@ class State: Hashable {
 		self.memPool = []
 		self.blockChain = []
 		self.blockChain.append(genesisBlock())
-		self.p2pProtocol = JSONProtocol()
+		self.p2pProtocol = P2PProtocol()
 		
 		var pubKey: CryptoKey
 		var privKey: CryptoKey

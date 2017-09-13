@@ -2,23 +2,32 @@ import Vapor
 
 extension Droplet {
     func setupRoutes() throws {
-        get("hello") { req in
-            var json = JSON()
-            try json.set("hello", "world")
-            return json
-        }
-
-        get("plaintext") { req in
-            return "Hello, world!"
-        }
-
-        // response to requests to /info domain
-        // with a description of the request
-        get("info") { req in
-            return req.description
-        }
-
-        get("description") { req in return req.description }
+		//Set up routes
+		get("peers") { req in
+			return "\(state.blockChain.count)"
+		}
+		
+		post("addPeer") { req in
+			return "Send a new peer here so I can add it!"
+		}
+		
+		//Set up webSockets
+		//Special WebSocket for a miner connection
+		socket("miner") { message, webSocket in
+			webSocket.onText = { ws, text in
+				print("Miner msg: " + text)
+				let json = try JSON(bytes: Array(text.utf8))
+				state.minerProtocol.received(json: json)
+			}
+		}
+		
+		socket("p2p") { message, webSocket in
+			webSocket.onText = { ws, text in
+				print("Received message: " + text)
+				let json = try JSON(bytes: Array(text.utf8))
+				state.p2pProtocol.received(json: json)
+			}
+		}
         
         try resource("posts", PostController.self)
     }

@@ -1,5 +1,5 @@
 //
-//  P2P.swift
+//  P2PProtocol.swift
 //  Bits
 //
 //  Created by Valtteri Koskivuori on 12/09/2017.
@@ -9,7 +9,7 @@ import Vapor
 import Foundation
 
 //Simple custom P2P protocol handling
-class JSONProtocol {
+class P2PProtocol {
 	
 	//Protocol funcs
 	func receivedBlock(block: Block) {
