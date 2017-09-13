@@ -25,9 +25,8 @@ class Transaction: NSObject, NSCoding {
 		let senderSignature = aDecoder.decodeObject(forKey: "senderSignature") as! ClientSignature
 		
 		let to = aDecoder.decodeObject(forKey: "to") as! Address
-		let blockHash = aDecoder.decodeObject(forKey: "hash") as! Data
 		
-		self.init(type: type, inputAmount: inputAmount, outputAmount: outputAmount, from: from, senderPubKey: senderPubKey, senderSignature: senderSignature, to: to, hash: blockHash)
+		self.init(type: type, inputAmount: inputAmount, outputAmount: outputAmount, from: from, senderPubKey: senderPubKey, senderSignature: senderSignature, to: to)
 	}
 	
 	func encode(with aCoder: NSCoder) {
@@ -38,10 +37,9 @@ class Transaction: NSObject, NSCoding {
 		aCoder.encode(senderPubKey, forKey: "senderPubKey")
 		aCoder.encode(senderSignature, forKey: "senderSignature")
 		aCoder.encode(to, forKey: "to")
-		aCoder.encode(txnHash, forKey: "blockHash")
 	}
 	
-	//Class params
+	//MARK: Class
 	enum txType {
 		case transaction
 		case blockReward
@@ -65,7 +63,9 @@ class Transaction: NSObject, NSCoding {
 	var senderSignature: ClientSignature
 	
 	var to: Address
-	var txnHash: Data
+	var txnHash: Data {
+		return self.encoded().sha256
+	}
 	
 	override init() {
 		self.type = .transaction
@@ -76,10 +76,9 @@ class Transaction: NSObject, NSCoding {
 		self.senderSignature = ClientSignature()
 		
 		self.to = Address()
-		self.txnHash = Data()
 	}
 	
-	init(type: txType, inputAmount: Int64, outputAmount: Int64, from: Address, senderPubKey: Address, senderSignature: ClientSignature, to: Address, hash: Data) {
+	init(type: txType, inputAmount: Int64, outputAmount: Int64, from: Address, senderPubKey: Address, senderSignature: ClientSignature, to: Address) {
 		self.type = type
 		self.inputAmount = inputAmount
 		self.outputAmount = outputAmount
@@ -87,11 +86,9 @@ class Transaction: NSObject, NSCoding {
 		self.senderPubKey = senderPubKey
 		self.senderSignature = senderSignature
 		self.to = to
-		self.txnHash = hash
 	}
 	
 	func encoded() -> Data {
-		//TODO
 		return NSKeyedArchiver.archivedData(withRootObject: self)
 	}
 	
