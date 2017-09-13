@@ -29,7 +29,7 @@ class ClientSignature {
 	
 	//TODO
 	func signMessage(msg: Data, priv: ClientSignature) -> Data {
-		let megaRandomBytes = [0x1a, 0x2b, 0x3c, 0x4d, 0x5e, 0x6f]
+		//let megaRandomBytes = [0x1a, 0x2b, 0x3c, 0x4d, 0x5e, 0x6f]
 		//let ecdsaSHA512Sig = try Signature.sign(message: msg, with: priv.privKey, using: .sha512)
 		//let ecdsaPrivateKey = try! CryptoKey(path: "/path/to/ecdsa_privateKey.pem", component: .privateKey(passphrase: nil))
 		//let ecdsaSHA512Sig = try Signature.sign(message: megaRandomBytes, with: ecdsaPrivateKey, using: .sha512)
