@@ -76,3 +76,8 @@ final class Block: NSObject, NSCoding {
 		return true
 	}
 }
+
+func genesisBlock() -> Block {
+	let genesis = Block(prevHash: Data(), depth: 0, txns: [], timestamp: 1505278315, difficulty: 1.0, nonce: 0, hash: Data())
+	return genesis
+}

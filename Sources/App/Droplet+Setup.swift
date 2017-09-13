@@ -3,20 +3,22 @@ import Foundation
 
 let state = State()
 
-let httpPort = 3003
-let p2pPort = 6262
-
 extension Droplet {
     public func setup() throws {
         try setupRoutes()
 		
+		//TODO: Move all this to setupRoutes
+		
+		//For now init state by reading value from there.
+		print("BlockChain count: \(state.blockChain.count)")
+		
 		//Set up routes
 		get("peers") { req in
-			return "test"
+			return "\(state.blockChain.count)"
 		}
 		
 		post("addPeer") { req in
-			return "test"
+			return "Send a new peer here so I can add it!"
 		}
 		
 		//Set up webSockets
@@ -32,29 +34,7 @@ extension Droplet {
 			webSocket.onText = { ws, text in
 				print("Received message: " + text)
 				let json = try JSON(bytes: Array(text.utf8))
-				if let msgType = json.object?["msgType"]?.string {
-					do {
-						switch (msgType) {
-						case "newBlock":
-							//TODO
-							try test()
-						case "getBlocks":
-							//TODO
-							try test()
-						case "getLatestBlock":
-							//TODO
-							try test()
-						case "getDifficulty":
-						//TODO
-							try test()
-						default:
-							//TODO
-							try test()
-						}
-					} catch {
-						print("fuck")
-					}
-				}
+				state.p2pProtocol.received(json: json)
 			}
 			
 			func test() throws {

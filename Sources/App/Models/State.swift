@@ -11,21 +11,30 @@ import Vapor
 
 //Current client state
 class State: Hashable {
-	
 	//Connections to other clients
 	var connections: [State: WebSocket]
 	//Pool of pending transactions to be processed
 	var memPool: [Transaction]
 	
+	//For now, just a in-memory array.
+	//Eventually have an in-memory queue of an array of arrays of blocks
+	//And then only store to DB when we TRUST a  block
+	var blockChain: [Block]
+	
 	var signature: ClientSignature? = nil
 	var socket: WebSocket? = nil
+	
+	var p2pProtocol: JSONProtocol
 	
 	var currentDifficulty: Int64
 	
 	init() {
-		
+		print("Initializing client state")
 		self.connections = [:]
 		self.memPool = []
+		self.blockChain = []
+		self.blockChain.append(genesisBlock())
+		self.p2pProtocol = JSONProtocol()
 		
 		var pubKey: CryptoKey
 		var privKey: CryptoKey
