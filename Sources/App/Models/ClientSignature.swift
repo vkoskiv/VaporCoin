@@ -25,8 +25,7 @@ class Signature {
 	
 	//TODO
 	func signMessage(msg: Data, priv: Signature) -> Data{
-		//Hash the message and 'encrypt' it
-		return Data()
+		let ecdsaSHA512Sig = try Signature.si
 	}
 	
 	//TODO
