@@ -20,9 +20,7 @@ final class Block: NSObject, NSCoding {
 	var depth: Int
 	var txns: [Transaction]
 	
-	var blockHash: Data {
-		return self.encoded().sha256
-	}
+	var blockHash: Data
 	
 	override init() {
 		self.prevHash = Data()
@@ -33,10 +31,11 @@ final class Block: NSObject, NSCoding {
 		
 		self.depth = 0
 		self.txns = []
+		self.blockHash = Data()
 		
 	}
 	
-	init(prevHash: Data, merkleRoot: MerkleRoot, depth: Int, txns: [Transaction], timestamp: Double, difficulty: Float, nonce: Int64) {
+	init(prevHash: Data, merkleRoot: MerkleRoot, depth: Int, txns: [Transaction], timestamp: Double, difficulty: Float, nonce: Int64, hash: Data) {
 		self.prevHash = prevHash
 		self.merkleRoot = merkleRoot
 		self.depth = depth
@@ -44,6 +43,7 @@ final class Block: NSObject, NSCoding {
 		self.timestamp = timestamp
 		self.target = difficulty
 		self.nonce = nonce
+		self.blockHash = hash
 	}
 	
 	func encoded() -> Data {
@@ -52,16 +52,21 @@ final class Block: NSObject, NSCoding {
 	
 	func verify() -> Bool {
 		//Verify the validity of a block
-		
-		//Verify the hash
 		//Check that the reported hash matches
 		let testHash = self.encoded().sha256
 		if self.blockHash != testHash {
 			print("Block hash doesn't match")
 			return false
 		}
-		//Check that hash is valid
+		//Check that hash is valid (Matches difficulty)
 		
+		//FIXME: This is a bit of a hack
+		if let hashNum = UInt256(data: NSData(data: self.blockHash)) {
+			//HASH < 2^(256-minDifficulty) / currentDifficulty
+			if hashNum < (UInt256.max - UInt256(32)) / UInt256(state.currentDifficulty) {
+				//TODO
+			}
+		}
 		
 		//Check timestamp
 		
@@ -78,7 +83,7 @@ final class Block: NSObject, NSCoding {
 		let difficulty = aDecoder.decodeFloat(forKey: "difficulty")
 		let nonce = aDecoder.decodeInt64(forKey: "nonce")
 		
-		self.init(prevHash: prevHash, merkleRoot: merkleRoot, depth: depth, txns: txns, timestamp: timestamp, difficulty: difficulty, nonce: nonce)
+		self.init(prevHash: prevHash, merkleRoot: merkleRoot, depth: depth, txns: txns, timestamp: timestamp, difficulty: difficulty, nonce: nonce, hash: Data())
 	}
 	
 	func encode(with aCoder: NSCoder) {
@@ -94,6 +99,6 @@ final class Block: NSObject, NSCoding {
 }
 
 func genesisBlock() -> Block {
-	let genesis = Block(prevHash: Data(), merkleRoot: MerkleRoot(), depth: 0, txns: [], timestamp: 1505278315, difficulty: 1.0, nonce: 0)
+	let genesis = Block(prevHash: Data(), merkleRoot: MerkleRoot(), depth: 0, txns: [], timestamp: 1505278315, difficulty: 1.0, nonce: 0, hash: Data())
 	return genesis
 }

@@ -13,6 +13,10 @@ class ClientSignature {
 	var pubKey: CryptoKey? = nil
 	var privKey: CryptoKey? = nil
 	
+	var address: Data {
+		return Data()
+	}
+	
 	init(pub: CryptoKey, priv: CryptoKey) {
 		self.pubKey = pub
 		self.privKey = priv
