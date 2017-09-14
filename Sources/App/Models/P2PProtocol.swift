@@ -14,8 +14,19 @@ class P2PProtocol {
 	//Protocol funcs
 	func receivedBlock(block: Block) {
 		//Check validity, and then remove txns from mempool
-		//TODO: Check block validity
-		state.blockChain.append(block)
+		if block.verify() {
+			//Remove block transactions from mempool, as they've been processed already.
+			for tx in block.txns {
+				state.memPool = state.memPool.filter { $0 != tx}
+			}
+			
+			//Block is valid, append
+			//TODO: Handle conflicts
+			state.blockChain.append(block)
+			
+			//And broadcast this block to other clients
+			broadcastBlock(block: block)
+		}
 	}
 	
 	func broadcastBlock(block: Block) {
