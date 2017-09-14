@@ -60,6 +60,16 @@ class State: Hashable {
 		return self.hashValue
 	}
 	
+	
+	//MARK: Interact with blockchain
+	func getBlockWithHash(hash: Data) -> Block {
+		return self.blockChain.filter { $0.blockHash = hash }
+	}
+	
+	func getLatestBlock() -> Block {
+		return self.blockChain.last
+	}
+	
 }
 
 func ==(lhs: State, rhs: State) -> Bool {
