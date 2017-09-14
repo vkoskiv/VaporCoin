@@ -14,42 +14,13 @@ class Address {
 
 class Transaction: NSObject, NSCoding {
 	
-	//MARK: Swift encoding logic
-	
-	public convenience required init?(coder aDecoder: NSCoder) {
-		let type = aDecoder.decodeObject(forKey: "type") as! txType
-		let inputAmount = aDecoder.decodeInt64(forKey: "inputAmount")
-		let outputAmount = aDecoder.decodeInt64(forKey: "outputAmount")
-		let from = aDecoder.decodeObject(forKey: "from") as! Address
-		let senderPubKey = aDecoder.decodeObject(forKey: "senderPubKey") as! Address
-		let senderSignature = aDecoder.decodeObject(forKey: "senderSignature") as! ClientSignature
-		
-		let to = aDecoder.decodeObject(forKey: "to") as! Address
-		
-		self.init(type: type, inputAmount: inputAmount, outputAmount: outputAmount, from: from, senderPubKey: senderPubKey, senderSignature: senderSignature, to: to)
-	}
-	
-	func encode(with aCoder: NSCoder) {
-		aCoder.encode(type, forKey: "type")
-		aCoder.encode(inputAmount, forKey: "inputAmount")
-		aCoder.encode(outputAmount, forKey: "outputAmount")
-		aCoder.encode(from, forKey: "from")
-		aCoder.encode(senderPubKey, forKey: "senderPubKey")
-		aCoder.encode(senderSignature, forKey: "senderSignature")
-		aCoder.encode(to, forKey: "to")
-	}
-	
 	//MARK: Class
-	enum txType {
-		case transaction
-		case blockReward
-		case dataRecord //Arbitrary data on the blockchain
-	}
 	
-	var type: txType
 	// 100,000,000 = 1.0 VaporCoins
 	//Difference between inputAmt and outputAmt goes to miner as fee
 	//TODO: Make sure output isn't greater than input
+	var inputs: [Transaction]
+	var outputs: [Transaction]
 	var inputAmount: Int64
 	var outputAmount: Int64
 	
@@ -63,40 +34,85 @@ class Transaction: NSObject, NSCoding {
 	var senderSignature: ClientSignature
 	
 	var to: Address
-	var txnHash: Data {
-		return self.encoded().sha256
-	}
+	var txnHash: Data
 	
 	override init() {
-		self.type = .transaction
 		self.inputAmount = 0
 		self.outputAmount = 0
+		self.inputs = []
+		self.outputs = []
 		self.from = Address()
 		self.senderPubKey = Address()
 		self.senderSignature = ClientSignature()
 		
 		self.to = Address()
+		self.txnHash = Data()
 	}
 	
-	init(type: txType, inputAmount: Int64, outputAmount: Int64, from: Address, senderPubKey: Address, senderSignature: ClientSignature, to: Address) {
-		self.type = type
+	init(inputs: [Transaction], outputs: [Transaction], inputAmount: Int64, outputAmount: Int64, from: Address, senderPubKey: Address, senderSignature: ClientSignature, to: Address, hash: Data) {
+		self.inputs = inputs
+		self.outputs = outputs
 		self.inputAmount = inputAmount
 		self.outputAmount = outputAmount
 		self.from = from
 		self.senderPubKey = senderPubKey
 		self.senderSignature = senderSignature
 		self.to = to
+		self.txnHash = hash
+	}
+	
+	func newTranscation(source: ClientSignature, dest: ClientSignature, input: Int64, output: Int64) -> Transaction {
+		//TODO
+		return Transaction()
+	}
+	
+	func getInputs(forOwner: ClientSignature, forAmount: Int64) -> [Transaction] {
+		//Get inputs
+		//Then map filter out ones that have been spent
+		//for tx in block.txns {
+		//	  state.memPool = state.memPool.filter { $0 != tx}
+		//}
+
+		//Then take required amount starting from oldest
+		return [Transaction()]
+	}
+	
+	func verify() -> Bool {
+		//Check that output <= input
+		//Check timestamp
+		//Check addresses?
+		return false
 	}
 	
 	func encoded() -> Data {
 		return NSKeyedArchiver.archivedData(withRootObject: self)
 	}
 	
-	func newTransaction() -> Transaction {
-		return Transaction()
+	//MARK: Swift encoding logic
+	
+	public convenience required init?(coder aDecoder: NSCoder) {
+		let inputs = aDecoder.decodeObject(forKey: "inputs") as! [Transaction]
+		let outputs = aDecoder.decodeObject(forKey: "outputs") as! [Transaction]
+		let inputAmount = aDecoder.decodeInt64(forKey: "inputAmount")
+		let outputAmount = aDecoder.decodeInt64(forKey: "outputAmount")
+		let from = aDecoder.decodeObject(forKey: "from") as! Address
+		let senderPubKey = aDecoder.decodeObject(forKey: "senderPubKey") as! Address
+		let senderSignature = aDecoder.decodeObject(forKey: "senderSignature") as! ClientSignature
+		
+		let to = aDecoder.decodeObject(forKey: "to") as! Address
+		let hash = aDecoder.decodeObject(forKey: "hash") as! Data
+		
+		self.init(inputs: inputs, outputs: outputs, inputAmount: inputAmount, outputAmount: outputAmount, from: from, senderPubKey: senderPubKey, senderSignature: senderSignature, to: to, hash: hash)
 	}
 	
-	func newBlockReward() -> Transaction {
-		return Transaction()
+	func encode(with aCoder: NSCoder) {
+		aCoder.encode(inputs, forKey: "inputs")
+		aCoder.encode(outputs, forKey: "outputs")
+		aCoder.encode(inputAmount, forKey: "inputAmount")
+		aCoder.encode(outputAmount, forKey: "outputAmount")
+		aCoder.encode(from, forKey: "from")
+		aCoder.encode(senderPubKey, forKey: "senderPubKey")
+		aCoder.encode(senderSignature, forKey: "senderSignature")
+		aCoder.encode(to, forKey: "to")
 	}
 }
