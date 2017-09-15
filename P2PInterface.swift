@@ -115,7 +115,7 @@ public final class JSONListener<StreamType: ServerStream>: CustomServer {
 			}
 			
 			//handle
-			state.p2pProtocol.received(json: jsonData, peer: state.peerForHostname(host: stream.hostname))
+			let JSONResponse = state.p2pProtocol.received(json: jsonData, peer: state.peerForHostname(host: stream.hostname))
 			
 			//And close stream
 			self.isClosed = true

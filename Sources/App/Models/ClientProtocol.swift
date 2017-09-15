@@ -43,9 +43,8 @@ class P2PProtocol {
 		//Called from receivedTransaction OR when creating one, broadcast to everyone except who came from when received
 	}
 	
-	//Internal JSON funcs
-	//Broadcast JSON to everyone
-	func received(json: JSON, peer: State) {
+	//JSON request handler
+	func received(json: JSON, peer: State) -> JSON {
 		if let msgType = json.object?["msgType"]?.string {
 			do {
 				switch (msgType) {
@@ -56,27 +55,28 @@ class P2PProtocol {
 					receivedTransaction(txn: transactionFromJSON(json: json))
 				case "existingBlock": //Requested some block
 					//TODO
-					try test()
+					return try test()
 				case "getBlocks": //Send blocks to sender
 					//TODO
-					try test()
+					return try test()
 				case "getLatestBlock": //Send latest block to sender
 					//TODO
-					try test()
+					return try test()
 				case "getDifficulty": //Send difficulty to sender
 					//TODO
-					try test()
+					return try test()
 				default:
 					//TODO
-					try test()
+					return try test()
 				}
 			} catch {
 				print("fuck")
 			}
 		}
+		return JSON()
 	}
 	
-	func test() throws {}
+	func test() throws -> JSON { return JSON() }
 	
 	func broadcast(json: JSON) {
 		

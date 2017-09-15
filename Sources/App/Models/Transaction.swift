@@ -7,6 +7,7 @@
 
 import Vapor
 import Foundation
+import Signature
 
 class Address {
 	
@@ -21,43 +22,40 @@ class Transaction: NSObject, NSCoding {
 	//TODO: Make sure output isn't greater than input
 	var inputs: [Transaction]
 	var outputs: [Transaction]
-	var inputAmount: Int64
-	var outputAmount: Int64
+	var transactionAmount: Int64
 	
 	var transactionFee: Int64 {
-		return inputAmount - outputAmount
+		return 0
 	}
 	
 	//From and senderpubkey are optional. BlockRewards don't need them.
 	var from: Address? = nil
-	var senderPubKey: Address? = nil //TODO: Keys and generation
+	var senderPubKey: CryptoKey? = nil //TODO: Keys and generation
 	var senderSignature: ClientSignature
 	
-	var to: Address
+	var recipient: ClientSignature
 	var txnHash: Data
 	
 	override init() {
-		self.inputAmount = 0
-		self.outputAmount = 0
+		self.transactionAmount = 0
 		self.inputs = []
 		self.outputs = []
 		self.from = Address()
-		self.senderPubKey = Address()
+		self.senderPubKey = try! CryptoKey(path: "", component: .publicKey)
 		self.senderSignature = ClientSignature()
 		
-		self.to = Address()
+		self.recipient = ClientSignature()
 		self.txnHash = Data()
 	}
 	
-	init(inputs: [Transaction], outputs: [Transaction], inputAmount: Int64, outputAmount: Int64, from: Address, senderPubKey: Address, senderSignature: ClientSignature, to: Address, hash: Data) {
+	init(inputs: [Transaction], outputs: [Transaction], transactionAmount: Int64, from: Address, senderPubKey: CryptoKey, senderSignature: ClientSignature, recipient: ClientSignature, hash: Data) {
 		self.inputs = inputs
 		self.outputs = outputs
-		self.inputAmount = inputAmount
-		self.outputAmount = outputAmount
+		self.transactionAmount = transactionAmount
 		self.from = from
 		self.senderPubKey = senderPubKey
 		self.senderSignature = senderSignature
-		self.to = to
+		self.recipient = recipient
 		self.txnHash = hash
 	}
 	
@@ -74,6 +72,29 @@ class Transaction: NSObject, NSCoding {
 		//}
 
 		//Then take required amount starting from oldest
+		
+		//let allAvailableTransactions = state.blockChain.filter { $0.txns.filter { $0.outputs.filter { $0.recipient.address == forOwner.address } } }
+		
+		var allAvailableTransactions: [Transaction] = []
+		
+		//Get all past input transactions of the sender
+		for block in state.blockChain {
+			for txn in block.txns {
+				if txn.recipient.address == forOwner.address {
+					allAvailableTransactions.append(txn)
+				}
+			}
+		}
+		
+		//Get all spent transactions
+		/*for block in state.blockChain {
+			for txn in block.txns {
+				if txn.senderPubKey == forOwner.pubKey {
+					
+				}
+			}
+		}*/
+		
 		return [Transaction()]
 	}
 	
@@ -93,26 +114,24 @@ class Transaction: NSObject, NSCoding {
 	public convenience required init?(coder aDecoder: NSCoder) {
 		let inputs = aDecoder.decodeObject(forKey: "inputs") as! [Transaction]
 		let outputs = aDecoder.decodeObject(forKey: "outputs") as! [Transaction]
-		let inputAmount = aDecoder.decodeInt64(forKey: "inputAmount")
-		let outputAmount = aDecoder.decodeInt64(forKey: "outputAmount")
+		let transactionAmount = aDecoder.decodeInt64(forKey: "transactionAmount")
 		let from = aDecoder.decodeObject(forKey: "from") as! Address
-		let senderPubKey = aDecoder.decodeObject(forKey: "senderPubKey") as! Address
+		let senderPubKey = aDecoder.decodeObject(forKey: "senderPubKey") as! CryptoKey
 		let senderSignature = aDecoder.decodeObject(forKey: "senderSignature") as! ClientSignature
 		
-		let to = aDecoder.decodeObject(forKey: "to") as! Address
+		let recipient = aDecoder.decodeObject(forKey: "recipient") as! ClientSignature
 		let hash = aDecoder.decodeObject(forKey: "hash") as! Data
 		
-		self.init(inputs: inputs, outputs: outputs, inputAmount: inputAmount, outputAmount: outputAmount, from: from, senderPubKey: senderPubKey, senderSignature: senderSignature, to: to, hash: hash)
+		self.init(inputs: inputs, outputs: outputs, transactionAmount: transactionAmount, from: from, senderPubKey: senderPubKey, senderSignature: senderSignature, recipient: recipient, hash: hash)
 	}
 	
 	func encode(with aCoder: NSCoder) {
 		aCoder.encode(inputs, forKey: "inputs")
 		aCoder.encode(outputs, forKey: "outputs")
-		aCoder.encode(inputAmount, forKey: "inputAmount")
-		aCoder.encode(outputAmount, forKey: "outputAmount")
+		aCoder.encode(transactionAmount, forKey: "transactionAmount")
 		aCoder.encode(from, forKey: "from")
 		aCoder.encode(senderPubKey, forKey: "senderPubKey")
 		aCoder.encode(senderSignature, forKey: "senderSignature")
-		aCoder.encode(to, forKey: "to")
+		aCoder.encode(recipient, forKey: "recipient")
 	}
 }

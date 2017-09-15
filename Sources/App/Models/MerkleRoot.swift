@@ -9,9 +9,14 @@ import Foundation
 
 class MerkleRoot {
 	
-	func computeMerkleRoot(txns: [Transaction]) -> MerkleRoot {
-		//TODO
-		return MerkleRoot()
+	var rootHash: Data
+	
+	init() {
+		self.rootHash = Data()
 	}
+	/*init(txns: [Transaction]) -> MerkleRoot {
+		self.rootHash = Data()
+		return self
+	}*/
 	
 }
