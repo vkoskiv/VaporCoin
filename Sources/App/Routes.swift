@@ -22,10 +22,11 @@ extension Droplet {
 		}
 		
 		socket("p2p") { message, webSocket in
+			var peer: State = State()
 			webSocket.onText = { ws, text in
 				print("Received message: " + text)
 				let json = try JSON(bytes: Array(text.utf8))
-				state.p2pProtocol.received(json: json)
+				state.p2pProtocol.received(json: json, peer: peer)
 			}
 		}
         

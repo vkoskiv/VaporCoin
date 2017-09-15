@@ -12,7 +12,8 @@ import Vapor
 //Current client state
 class State: Hashable {
 	//Connections to other clients
-	var connections: [State: WebSocket]
+	//Hostname: Peer
+	var peers: [String: State]
 	//Pool of pending transactions to be processed
 	var memPool: [Transaction]
 	
@@ -31,10 +32,14 @@ class State: Hashable {
 	var currentDifficulty: Int64
 	var blocksSinceDifficultyUpdate: Int
 	
+	func prepareDefaultPeers() {
+		
+	}
+	
 	
 	init() {
 		print("Initializing client state")
-		self.connections = [:]
+		self.peers = [:]
 		self.memPool = []
 		self.blockChain = []
 		self.blockChain.append(genesisBlock())
@@ -60,14 +65,23 @@ class State: Hashable {
 		return self.hashValue
 	}
 	
+	func peerForHostname(host: String) -> State {
+		//return (self.peers.filter { $0.key.hostname == host }.first?.key)!
+		return self.peers[host]!
+	}
 	
 	//MARK: Interact with blockchain
 	func getBlockWithHash(hash: Data) -> Block {
-		return self.blockChain.filter { $0.blockHash = hash }
+		let blocks = self.blockChain.filter { $0.blockHash == hash }
+		if blocks.count > 1 {
+			print("Found more than 1 block with this hash. Yer blockchain's fucked.")
+			return Block()
+		}
+		return blocks.first!
 	}
 	
 	func getLatestBlock() -> Block {
-		return self.blockChain.last
+		return self.blockChain.last!
 	}
 	
 }

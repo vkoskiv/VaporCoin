@@ -15,10 +15,12 @@ class P2PProtocol {
 	func receivedBlock(block: Block) {
 		//Check validity, and then remove txns from mempool
 		if block.verify() {
+			print("Block \(block.depth) valid!")
 			//Remove block transactions from mempool, as they've been processed already.
 			for tx in block.txns {
 				state.memPool = state.memPool.filter { $0 != tx}
 			}
+			print("Removed \(block.txns.count) transactions from mempool")
 			
 			//Block is valid, append
 			//TODO: Handle conflicts
@@ -43,7 +45,7 @@ class P2PProtocol {
 	
 	//Internal JSON funcs
 	//Broadcast JSON to everyone
-	func received(json: JSON) {
+	func received(json: JSON, peer: State) {
 		if let msgType = json.object?["msgType"]?.string {
 			do {
 				switch (msgType) {
