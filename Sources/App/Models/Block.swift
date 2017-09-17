@@ -58,18 +58,30 @@ final class Block: NSObject, NSCoding {
 			print("Block hash doesn't match")
 			return false
 		}
-		//Check that hash is valid (Matches difficulty)
 		
+		//Check that hash is valid (Matches difficulty)
 		//FIXME: This is a bit of a hack
 		if let hashNum = UInt256(data: NSData(data: self.blockHash)) {
 			//HASH < 2^(256-minDifficulty) / currentDifficulty
-			if hashNum < (UInt256.max - UInt256(32)) / UInt256(state.currentDifficulty) {
-				//TODO
+			if hashNum > (UInt256.max - UInt256(32)) / UInt256(state.currentDifficulty) {
+				//Block hash doesn't match current difficulty
+				return false
 			}
 		}
 		
 		//Check timestamp
+		let currentTime: Double = Double(Date().timeIntervalSince1970)
+		let maxTimeDeviation: Double = 1800 // 30 minutes
+		if self.timestamp < (currentTime - maxTimeDeviation) {
+			//Block timestamp more than 30min in past
+			return false
+		}
+		if self.timestamp > (currentTime + maxTimeDeviation) {
+			//Block timestamp more than 30min in future
+			return false
+		}
 		
+		//Looks good
 		return true
 	}
 	
