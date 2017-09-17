@@ -9,11 +9,16 @@ import Foundation
 import Signature
 import Vapor
 
+class PeerState {
+	//Only store what we need to know of a peer
+	
+}
+
 //Current client state
 class State: Hashable {
 	//Connections to other clients
 	//Hostname: Peer
-	var peers: [String: State]
+	var peers: [String: PeerState]
 	//Pool of pending transactions to be processed
 	var memPool: [Transaction]
 	
@@ -23,19 +28,12 @@ class State: Hashable {
 	var blockChain: [Block]
 	
 	var signature: ClientSignature? = nil
-	var socket: WebSocket? = nil
-	
-	//TODO: Separate these two into 2 protocol classes
+
 	var p2pProtocol: P2PProtocol
 	var minerProtocol: MinerProtocol
 	
 	var currentDifficulty: Int64
 	var blocksSinceDifficultyUpdate: Int
-	
-	func prepareDefaultPeers() {
-		
-	}
-	
 	
 	init() {
 		print("Initializing client state")
@@ -65,7 +63,7 @@ class State: Hashable {
 		return self.hashValue
 	}
 	
-	func peerForHostname(host: String) -> State {
+	func peerForHostname(host: String) -> PeerState {
 		//return (self.peers.filter { $0.key.hostname == host }.first?.key)!
 		return self.peers[host]!
 	}

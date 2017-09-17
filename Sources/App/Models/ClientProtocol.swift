@@ -44,7 +44,7 @@ class P2PProtocol {
 	}
 	
 	//JSON request handler
-	func received(json: JSON, peer: State) -> JSON {
+	func received(json: JSON, peer: PeerState) -> JSON {
 		if let msgType = json.object?["msgType"]?.string {
 			do {
 				switch (msgType) {

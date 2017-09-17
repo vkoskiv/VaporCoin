@@ -9,26 +9,25 @@ import Vapor
 import Foundation
 import Signature
 
+class TransactionInput {
+	
+}
+
+class TransactionOutput {
+	
+}
+
 class Address {
 	
 }
 
 class Transaction: NSObject, NSCoding {
 	
-	//MARK: Class
-	
 	// 100,000,000 = 1.0 VaporCoins
-	//Difference between inputAmt and outputAmt goes to miner as fee
-	//TODO: Make sure output isn't greater than input
-	var inputs: [Transaction]
-	var outputs: [Transaction]
+	var inputs: [TransactionInput]
+	var outputs: [TransactionOutput]
 	var transactionAmount: Int64
 	
-	var transactionFee: Int64 {
-		return 0
-	}
-	
-	//From and senderpubkey are optional. BlockRewards don't need them.
 	var from: Address? = nil
 	var senderPubKey: CryptoKey? = nil //TODO: Keys and generation
 	var senderSignature: ClientSignature
@@ -48,7 +47,7 @@ class Transaction: NSObject, NSCoding {
 		self.txnHash = Data()
 	}
 	
-	init(inputs: [Transaction], outputs: [Transaction], transactionAmount: Int64, from: Address, senderPubKey: CryptoKey, senderSignature: ClientSignature, recipient: ClientSignature, hash: Data) {
+	init(inputs: [TransactionInput], outputs: [TransactionOutput], transactionAmount: Int64, from: Address, senderPubKey: CryptoKey, senderSignature: ClientSignature, recipient: ClientSignature, hash: Data) {
 		self.inputs = inputs
 		self.outputs = outputs
 		self.transactionAmount = transactionAmount
@@ -112,8 +111,8 @@ class Transaction: NSObject, NSCoding {
 	//MARK: Swift encoding logic
 	
 	public convenience required init?(coder aDecoder: NSCoder) {
-		let inputs = aDecoder.decodeObject(forKey: "inputs") as! [Transaction]
-		let outputs = aDecoder.decodeObject(forKey: "outputs") as! [Transaction]
+		let inputs = aDecoder.decodeObject(forKey: "inputs") as! [TransactionInput]
+		let outputs = aDecoder.decodeObject(forKey: "outputs") as! [TransactionOutput]
 		let transactionAmount = aDecoder.decodeInt64(forKey: "transactionAmount")
 		let from = aDecoder.decodeObject(forKey: "from") as! Address
 		let senderPubKey = aDecoder.decodeObject(forKey: "senderPubKey") as! CryptoKey
