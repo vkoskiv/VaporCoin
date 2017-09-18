@@ -8,6 +8,7 @@
 import Foundation
 import Signature
 import Vapor
+import Transport
 
 class PeerState {
 	//Only store what we need to know of a peer
@@ -32,6 +33,8 @@ class State: Hashable {
 	var p2pProtocol: P2PProtocol
 	var minerProtocol: MinerProtocol
 	
+	var server: TCPJSONServer?
+	
 	var currentDifficulty: Int64
 	var blocksSinceDifficultyUpdate: Int
 	
@@ -43,6 +46,10 @@ class State: Hashable {
 		self.blockChain.append(genesisBlock())
 		self.p2pProtocol = P2PProtocol()
 		self.minerProtocol = MinerProtocol()
+		
+		self.server = try? TCPJSONServer()
+		try? self.server?.start()
+		
 		self.currentDifficulty = 1
 		self.blocksSinceDifficultyUpdate = 1
 		

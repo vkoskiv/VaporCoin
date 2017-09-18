@@ -37,6 +37,8 @@ extension CustomServer {
 //Timeout a peer after 30min of inactivity
 public var defaultPeerTimeout: Double = 30
 
+public typealias TCPJSONServer = JSONServer<TCPInternetSocket>
+
 public final class JSONServer<StreamType: ServerStream>: CustomServer {
 	public let stream: StreamType
 	public let listenMax: Int
@@ -133,5 +135,17 @@ public final class JSONServer<StreamType: ServerStream>: CustomServer {
 			try? stream.close()
 			
 		} while !stream.isClosed
+	}
+}
+
+extension JSONServer where StreamType == TCPInternetSocket {
+	public convenience init(
+		scheme: String = "coin",
+		hostname: String = "0.0.0.0",
+		port: Port = 6001,
+		listenMax: Int = 64
+		) throws {
+		let tcp = try StreamType(scheme: scheme, hostname: hostname, port: port)
+		try self.init(tcp, listenMax: listenMax)
 	}
 }
