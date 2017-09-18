@@ -9,17 +9,13 @@ import Foundation
 import Signature
 import Vapor
 import Transport
-
-class PeerState {
-	//Only store what we need to know of a peer
-	
-}
+import Sockets
 
 //Current client state
 class State: Hashable {
 	//Connections to other clients
-	//Hostname: Peer
-	var peers: [String: PeerState]
+	//Hostname: Client
+	var peers: [TCPJSONClient]
 	//Pool of pending transactions to be processed
 	var memPool: [Transaction]
 	
@@ -40,7 +36,7 @@ class State: Hashable {
 	
 	init() {
 		print("Initializing client state")
-		self.peers = [:]
+		self.peers = []
 		self.memPool = []
 		self.blockChain = []
 		self.blockChain.append(genesisBlock())
@@ -49,6 +45,11 @@ class State: Hashable {
 		
 		self.server = try? TCPJSONServer()
 		try? self.server?.start()
+		
+		//Set up initial client conns
+		let testSocket = try! TCPInternetSocket(scheme: "coin", hostname: "0.0.0.0", port: 6001)
+		let client = try! TCPJSONClient(testSocket)
+		peers.append(client)
 		
 		self.currentDifficulty = 1
 		self.blocksSinceDifficultyUpdate = 1
@@ -68,11 +69,6 @@ class State: Hashable {
 	
 	var hashValue: Int {
 		return self.hashValue
-	}
-	
-	func peerForHostname(host: String) -> PeerState {
-		//return (self.peers.filter { $0.key.hostname == host }.first?.key)!
-		return self.peers[host]!
 	}
 	
 	//MARK: Interact with blockchain
