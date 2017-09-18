@@ -15,10 +15,10 @@ public final class JSONRPCParser {
 		buffer = []
 	}
 	
-	public func parse(bytes: Bytes) -> JSON? {
+	public func parse() -> JSON? {
 		var response: JSON?
 		
-		for byte in bytes {
+		for byte in buffer {
 			buffer.append(byte)
 			if byte == Byte("}") {
 				response = try! JSON(bytes: buffer)

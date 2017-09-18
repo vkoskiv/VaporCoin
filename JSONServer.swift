@@ -1,5 +1,5 @@
 //
-//  P2PInterface.swift
+//  JSONServer.swift
 //  App
 //
 //  Created by Valtteri Koskivuori on 14/09/2017.
@@ -37,9 +37,8 @@ extension CustomServer {
 //Timeout a peer after 30min of inactivity
 public var defaultPeerTimeout: Double = 30
 
-public final class JSONListener<StreamType: ServerStream>: CustomServer {
+public final class JSONServer<StreamType: ServerStream>: CustomServer {
 	public let stream: StreamType
-	public var isClosed: Bool
 	public let listenMax: Int
 	
 	public var scheme: String {
@@ -54,7 +53,6 @@ public final class JSONListener<StreamType: ServerStream>: CustomServer {
 	
 	public init(_ stream: StreamType, listenMax: Int = 128) throws {
 		self.stream = stream
-		self.isClosed = false
 		self.listenMax = listenMax
 	}
 	
@@ -64,7 +62,6 @@ public final class JSONListener<StreamType: ServerStream>: CustomServer {
 	
 	public func start() throws {
 		try stream.bind()
-		self.isClosed = false
 		try stream.listen(max: listenMax)
 		
 		while true {
@@ -89,23 +86,23 @@ public final class JSONListener<StreamType: ServerStream>: CustomServer {
 	
 	private func handleRequest(stream: StreamType.Client) throws {
 		try stream.setTimeout(defaultPeerTimeout)
-		var buffer = Bytes(repeating: 0, count: 2048)
+		//var buffer = Bytes(repeating: 0, count: 2048)
+		var parser = JSONRPCParser()
 		
 		//Close stream after handling
 		defer {
 			try? stream.close()
 		}
 		
-		var keepAlive = false
 		main: repeat {
 			var json: JSON?
 			
 			while json == nil {
-				let read = try stream.read(max: buffer.count, into: &buffer)
+				let read = try stream.read(max: parser.buffer.count, into: &parser.buffer)
 				guard read > 0 else {
 					break main
 				}
-				json = try JSON(bytes: buffer)
+				json = parser.parse()
 			}
 			
 			guard let jsonData = json else {
@@ -117,16 +114,24 @@ public final class JSONListener<StreamType: ServerStream>: CustomServer {
 			//handle
 			let JSONResponse = state.p2pProtocol.received(json: jsonData, peer: state.peerForHostname(host: stream.hostname))
 			
-			//And close stream
-			self.isClosed = true
+			//Serialize and send response
 			
-		} while keepAlive && !self.isClosed
-	}
-
-}
-
-class myResponder: Responder {
-	func respond(to request: Request) throws -> Response {
-		return Response(redirect: "")
+			let responseBytes = try JSONResponse.makeBytes()
+			
+			while true {
+				guard responseBytes.count > 0 else {
+					break
+				}
+				let writtenBytes = try stream.write(max: responseBytes.count, from: responseBytes)
+				guard writtenBytes == responseBytes.count else {
+					print("Error writing to stream")
+					break
+				}
+			}
+			
+			//And close stream
+			try? stream.close()
+			
+		} while !stream.isClosed
 	}
 }
