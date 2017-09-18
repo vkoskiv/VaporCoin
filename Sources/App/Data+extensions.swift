@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Crypto
 
 extension Data {
 	//Return a hex string representation of a Data object
@@ -15,11 +16,8 @@ extension Data {
 	}
 	
 	var sha256: Data {
-		var hash = [UInt8](repeating: 0, count: Int(CC_SHA256_DIGEST_LENGTH))
-		self.withUnsafeBytes {
-			_ = CC_SHA256($0, CC_LONG(self.count), &hash)
-		}
-		return Data(bytes: hash)
+		let hasher = CryptoHasher(hash: .sha256, encoding: .plain)
+		return Data(try! hasher.make(self))
 	}
 }
 
@@ -29,10 +27,7 @@ extension String {
 	}
 	
 	var sha256: Data {
-		var hash = [UInt8](repeating: 0, count: Int(CC_SHA256_DIGEST_LENGTH))
-		self.data(using: .utf8)?.withUnsafeBytes {
-			_ = CC_SHA256($0, CC_LONG(self.count), &hash)
-		}
-		return Data(bytes: hash)
+		let hasher = CryptoHasher(hash: .sha256, encoding: .plain)
+		return Data(try! hasher.make(self.makeBytes()))
 	}
 }
