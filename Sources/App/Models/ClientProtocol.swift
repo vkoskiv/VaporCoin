@@ -11,6 +11,41 @@ import Foundation
 //Simple custom P2P protocol handling
 class P2PProtocol {
 	
+	//JSON request handler
+	func received(json: JSON) -> JSON {
+		var response = JSON()
+		if let msgType = json.object?["msgType"]?.string {
+			do {
+				switch (msgType) {
+				case "newBlock": //New block was found and broadcasted by someone
+					//TODO
+					receivedBlock(block: blockFromJSON(json: json))
+				case "newTransaction":
+					receivedTransaction(txn: transactionFromJSON(json: json))
+				case "existingBlock": //Requested some block
+					//TODO
+					return try test()
+				case "getBlocks": //Send blocks to sender
+					//TODO
+					return try test()
+				case "getLatestBlock": //Send latest block to sender
+					//TODO
+					return try test()
+				case "getDifficulty": //Send difficulty to sender
+					//TODO
+					return try test()
+				default:
+					//TODO
+					return try test()
+				}
+			} catch {
+				print("fuck")
+			}
+		}
+		//Send reply
+		return JSON()
+	}
+	
 	//Protocol funcs
 	func receivedBlock(block: Block) {
 		//Check validity, and then remove txns from mempool
@@ -41,39 +76,6 @@ class P2PProtocol {
 	
 	func broadcastTransaction(txn: Transaction) {
 		//Called from receivedTransaction OR when creating one, broadcast to everyone except who came from when received
-	}
-	
-	//JSON request handler
-	func received(json: JSON, from: String) -> JSON {
-		if let msgType = json.object?["msgType"]?.string {
-			do {
-				switch (msgType) {
-				case "newBlock": //New block was found and broadcasted by someone
-					//TODO
-					receivedBlock(block: blockFromJSON(json: json))
-				case "newTransaction":
-					receivedTransaction(txn: transactionFromJSON(json: json))
-				case "existingBlock": //Requested some block
-					//TODO
-					return try test()
-				case "getBlocks": //Send blocks to sender
-					//TODO
-					return try test()
-				case "getLatestBlock": //Send latest block to sender
-					//TODO
-					return try test()
-				case "getDifficulty": //Send difficulty to sender
-					//TODO
-					return try test()
-				default:
-					//TODO
-					return try test()
-				}
-			} catch {
-				print("fuck")
-			}
-		}
-		return JSON()
 	}
 	
 	func test() throws -> JSON { return JSON() }

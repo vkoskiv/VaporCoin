@@ -52,9 +52,11 @@ public final class JSONServer<StreamType: ServerStream>: CustomServer {
 	public var port: Port {
 		return stream.port
 	}
+	public var connectionCount: Int
 	
 	public init(_ stream: StreamType, listenMax: Int = 128) throws {
 		self.stream = stream
+		self.connectionCount = 0
 		self.listenMax = listenMax
 	}
 	

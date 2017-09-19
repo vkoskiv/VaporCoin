@@ -28,8 +28,10 @@ class State: Hashable {
 
 	var p2pProtocol: P2PProtocol
 	var minerProtocol: MinerProtocol
-	
 	var server: TCPJSONServer?
+	var outboundConnections: Int {
+		return self.peers.count
+	}
 	
 	var currentDifficulty: Int64
 	var blocksSinceDifficultyUpdate: Int
@@ -43,16 +45,16 @@ class State: Hashable {
 		self.p2pProtocol = P2PProtocol()
 		self.minerProtocol = MinerProtocol()
 		
+		//Blockchain state params
+		self.currentDifficulty = 1
+		self.blocksSinceDifficultyUpdate = 1
+		
+		//Listen for requests
 		self.server = try? TCPJSONServer()
 		try? self.server?.start()
 		
 		//Set up initial client conns
-		let testSocket = try! TCPInternetSocket(scheme: "coin", hostname: "0.0.0.0", port: 6001)
-		let client = try! TCPJSONClient(testSocket)
-		peers.append(client)
-		
-		self.currentDifficulty = 1
-		self.blocksSinceDifficultyUpdate = 1
+		initConnections()
 		
 		var pubKey: CryptoKey
 		var privKey: CryptoKey
@@ -65,6 +67,16 @@ class State: Hashable {
 		} catch {
 			print("Crypto keys not found!")
 		}
+	}
+	
+	func initConnections() {
+		//Hard-coded, known nodes to start querying state from
+		let proteus = try! TCPInternetSocket(scheme: "coin", hostname: "proteus.vkoskiv.com", port: 6001)
+		let triton  = try! TCPInternetSocket(scheme: "coin", hostname:  "triton.vkoskiv.com", port: 6001)
+		var client = try! TCPJSONClient(proteus)
+		peers.append(client)
+		client = try! TCPJSONClient(triton)
+		peers.append(client)
 	}
 	
 	var hashValue: Int {
