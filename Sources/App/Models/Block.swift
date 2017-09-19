@@ -100,7 +100,7 @@ final class Block: NSObject, NSCoding {
 	
 	func encode(with aCoder: NSCoder) {
 		aCoder.encode(prevHash, forKey: "prevHash")
-		aCoder.encode(merkleRoot, forKey: "merkleRoot")
+		aCoder.encode(merkleRoot, forKey: "merkleRoot") //FIXME: Crashes here
 		aCoder.encode(timestamp, forKey: "timestamp")
 		aCoder.encode(target, forKey: "target")
 		aCoder.encode(nonce, forKey: "nonce")

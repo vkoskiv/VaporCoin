@@ -11,6 +11,31 @@ import Foundation
 //Simple custom P2P protocol handling
 class P2PProtocol {
 	
+	/*
+	JSON-RPC 1.0
+	Request:
+	method, params, id
+	
+	Response:
+	result, error, id
+	
+	Notification
+	method, params, id = null
+	*/
+	
+	/*
+	Todo:
+	
+	Requests:
+	getBlock(s) - param is current latest block (Bundle multiple encoded blocks? getBlock-response loop?)
+	getDifficulty - Get current difficulty
+	
+	
+	Broadcasts:
+	newTransaction - New transaction
+	newBlock - New, freshly mined block
+	*/
+	
 	//JSON request handler
 	func received(json: JSON) -> JSON {
 		var response = JSON()
@@ -18,8 +43,7 @@ class P2PProtocol {
 			do {
 				switch (msgType) {
 				case "newBlock": //New block was found and broadcasted by someone
-					//TODO
-					receivedBlock(block: blockFromJSON(json: json))
+					response = receivedBlock(block: blockFromJSON(json: json))
 				case "newTransaction":
 					receivedTransaction(txn: transactionFromJSON(json: json))
 				case "existingBlock": //Requested some block
@@ -43,11 +67,11 @@ class P2PProtocol {
 			}
 		}
 		//Send reply
-		return JSON()
+		return response
 	}
 	
 	//Protocol funcs
-	func receivedBlock(block: Block) {
+	func receivedBlock(block: Block) -> JSON {
 		//Check validity, and then remove txns from mempool
 		if block.verify() {
 			print("Block \(block.depth) valid!")
@@ -64,6 +88,7 @@ class P2PProtocol {
 			//And broadcast this block to other clients
 			broadcastBlock(block: block)
 		}
+		return JSON()
 	}
 	
 	func broadcastBlock(block: Block) {

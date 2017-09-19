@@ -116,7 +116,7 @@ public final class JSONServer<StreamType: ServerStream>: CustomServer {
 			}
 			
 			//handle
-			let JSONResponse = state.p2pProtocol.received(json: jsonData, from: stream.hostname)
+			let JSONResponse = state.p2pProtocol.received(json: jsonData)
 			
 			//Serialize and send response
 			
