@@ -32,9 +32,10 @@ Transactions:
 - Simplified Bitcoin-style transactions, UTXO (No scripting capability)
 - ECDSA signatures
 
-Proof of Work (PoW) algorithm
+Proof of Work (PoW) algorithm:
 
 - Simplified Bitcoin-style. SHA256 hash of block header
+
 Block header: 
 - Previous hash
 - Merkle root of transactions in block
