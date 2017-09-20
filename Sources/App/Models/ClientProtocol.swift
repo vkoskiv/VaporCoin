@@ -70,6 +70,18 @@ class P2PProtocol {
 		return response
 	}
 	
+	func updateDifficulty() {
+		//Look at how long last 60 blocks took, and update difficulty
+		let startTime = state.blockChain[state.blockChain.endIndex - 60].timestamp
+		let timeDiff = state.blockChain.last!.timestamp - startTime
+		print("Last 60 blocks took \(timeDiff) seconds")
+		//Target is 3600s (1 hour)
+		print("Difficulty before: \(state.currentDifficulty)")
+		state.currentDifficulty *= Int64(3600 / timeDiff)
+		print("Difficulty after:  \(state.currentDifficulty)")
+		state.blocksSinceDifficultyUpdate = 0
+	}
+	
 	//Protocol funcs
 	func receivedBlock(block: Block) -> JSON {
 		//Check validity, and then remove txns from mempool
@@ -84,6 +96,11 @@ class P2PProtocol {
 			//Block is valid, append
 			//TODO: Handle conflicts
 			state.blockChain.append(block)
+			
+			state.blocksSinceDifficultyUpdate += 1
+			if state.blocksSinceDifficultyUpdate >= 60 {
+				updateDifficulty()
+			}
 			
 			//And broadcast this block to other clients
 			broadcastBlock(block: block)
