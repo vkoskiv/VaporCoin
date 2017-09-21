@@ -33,8 +33,11 @@ class State: Hashable {
 		return self.peers.count
 	}
 	
+	let version: Int = 1
+	
 	var currentDifficulty: Int64
 	var blocksSinceDifficultyUpdate: Int
+	var blockDepth: Int
 	
 	init() {
 		print("Initializing client state")
@@ -49,6 +52,7 @@ class State: Hashable {
 		//Blockchain state params
 		self.currentDifficulty = 1
 		self.blocksSinceDifficultyUpdate = 1
+		self.blockDepth = 1
 		
 		//Listen for requests
 		self.server = try? TCPJSONServer()
@@ -56,6 +60,15 @@ class State: Hashable {
 		
 		//Set up initial client conns
 		initConnections()
+		queryPeers()
+		
+		
+		//Start syncing on a background thread
+		DispatchQueue.global(qos: .background).async {
+			DispatchQueue.main.async {
+				self.startSync()
+			}
+		}
 		
 		var pubKey: CryptoKey
 		var privKey: CryptoKey
@@ -67,6 +80,20 @@ class State: Hashable {
 			self.signature = ClientSignature(pub: pubKey, priv: privKey)
 		} catch {
 			print("Crypto keys not found!")
+		}
+	}
+	
+	func startSync() {
+		//Query other nodes for blockchain status, and then sync until latest block
+		print("Starting background sync, from block \(state.blockDepth)")
+	}
+	
+	//Get new peers AND get current network status (difficulty, block depth)
+	func queryPeers() {
+		//Query for new peers to add to list
+		//TODO: A ping request to see if node is alive + versioning
+		for p in peers {
+			
 		}
 	}
 	
@@ -96,6 +123,18 @@ class State: Hashable {
 	
 	func getLatestBlock() -> Block {
 		return self.blockChain.last!
+	}
+	
+	func updateDifficulty() {
+		//Look at how long last 60 blocks took, and update difficulty
+		let startTime = self.blockChain[self.blockChain.endIndex - 60].timestamp
+		let timeDiff = self.blockChain.last!.timestamp - startTime
+		print("Last 60 blocks took \(timeDiff) seconds")
+		//Target is 3600s (1 hour)
+		print("Difficulty before: \(self.currentDifficulty)")
+		self.currentDifficulty *= Int64(3600 / timeDiff)
+		print("Difficulty after:  \(self.currentDifficulty)")
+		self.blocksSinceDifficultyUpdate = 0
 	}
 	
 }

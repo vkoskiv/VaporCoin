@@ -8,6 +8,13 @@
 import Vapor
 import Foundation
 
+public enum RequestType {
+	case getVersion    //Get version (Also pings)
+	case getBlock      //Get block
+	case getDifficulty  //Get current difficulty
+	case newTransaction //Send new transaction
+}
+
 //Simple custom P2P protocol handling
 class P2PProtocol {
 	
@@ -70,17 +77,52 @@ class P2PProtocol {
 		return response
 	}
 	
-	func updateDifficulty() {
-		//Look at how long last 60 blocks took, and update difficulty
-		let startTime = state.blockChain[state.blockChain.endIndex - 60].timestamp
-		let timeDiff = state.blockChain.last!.timestamp - startTime
-		print("Last 60 blocks took \(timeDiff) seconds")
-		//Target is 3600s (1 hour)
-		print("Difficulty before: \(state.currentDifficulty)")
-		state.currentDifficulty *= Int64(3600 / timeDiff)
-		print("Difficulty after:  \(state.currentDifficulty)")
-		state.blocksSinceDifficultyUpdate = 0
+	//Sent requests
+	func sendRequest<T>(request: RequestType, to: TCPJSONClient?, _ param: T) -> JSON {
+		
+		var json = JSON()
+		var response = JSON()
+		
+		switch (request) {
+		case .newTransaction:
+			json = broadcastTransaction(txn: param as! Transaction)
+		case .getBlock:
+			json = getBlock(depth: param as! Int)
+		default:
+			json = JSON()
+		}
+		
+		guard to != nil else {
+			//Send to all
+			for p in state.peers {
+				do {
+					json = try p.sendRequest(json: json)
+				} catch {
+					print("Failed to send request: \(json.string ?? "oops")")
+				}
+			}
+			return json //Why do we need this???
+		}
+		
+		//Send to a specific peer
+		do {
+			response = try to!.sendRequest(json: json)
+		} catch {
+			print("Failed to send request: \(String(describing: json.string)) to \(String(describing: to?.hostname))")
+		}
+		
+		return response
 	}
+	
+	func broadcastTransaction(txn: Transaction) -> JSON {
+		return JSON()
+	}
+	
+	func getBlock(depth: Int) -> JSON {
+		return JSON()
+	}
+	
+	//Other funcs
 	
 	//Protocol funcs
 	func receivedBlock(block: Block) -> JSON {
@@ -98,8 +140,9 @@ class P2PProtocol {
 			state.blockChain.append(block)
 			
 			state.blocksSinceDifficultyUpdate += 1
+			state.blockDepth += 1
 			if state.blocksSinceDifficultyUpdate >= 60 {
-				updateDifficulty()
+				state.updateDifficulty()
 			}
 			
 			//And broadcast this block to other clients
@@ -116,19 +159,7 @@ class P2PProtocol {
 		//Check validity, and then add to mempool
 	}
 	
-	func broadcastTransaction(txn: Transaction) {
-		//Called from receivedTransaction OR when creating one, broadcast to everyone except who came from when received
-	}
-	
 	func test() throws -> JSON { return JSON() }
-	
-	func broadcast(json: JSON) {
-		
-	}
-	//Send to specific client
-	func send(json: JSON) {
-		
-	}
 	
 	//Block from JSON
 	func blockFromJSON(json: JSON) -> Block {
