@@ -17,10 +17,6 @@ class TransactionOutput {
 	
 }
 
-class Address {
-	
-}
-
 class Transaction: NSObject, NSCoding {
 	
 	// 100,000,000 = 1.0 VaporCoins
@@ -28,26 +24,26 @@ class Transaction: NSObject, NSCoding {
 	var outputs: [TransactionOutput]
 	var transactionAmount: Int64
 	
-	var from: Address? = nil
-	var senderPubKey: CryptoKey? = nil //TODO: Keys and generation
-	var senderSignature: ClientSignature
+	var from: Data
+	var senderPubKey: Data
+	var senderSignature: Data
 	
-	var recipient: ClientSignature
+	var recipient: Data
 	var txnHash: Data
 	
 	override init() {
 		self.transactionAmount = 0
 		self.inputs = []
 		self.outputs = []
-		self.from = Address()
-		self.senderPubKey = try! CryptoKey(path: "", component: .publicKey)
-		self.senderSignature = ClientSignature()
+		self.from = Data()
+		self.senderPubKey = Data()
+		self.senderSignature = Data()
 		
-		self.recipient = ClientSignature()
+		self.recipient = Data()
 		self.txnHash = Data()
 	}
 	
-	init(inputs: [TransactionInput], outputs: [TransactionOutput], transactionAmount: Int64, from: Address, senderPubKey: CryptoKey, senderSignature: ClientSignature, recipient: ClientSignature, hash: Data) {
+	init(inputs: [TransactionInput], outputs: [TransactionOutput], transactionAmount: Int64, from: Data, senderPubKey: Data, senderSignature: Data, recipient: Data, hash: Data) {
 		self.inputs = inputs
 		self.outputs = outputs
 		self.transactionAmount = transactionAmount
@@ -79,7 +75,7 @@ class Transaction: NSObject, NSCoding {
 		//Get all past input transactions of the sender
 		for block in state.blockChain {
 			for txn in block.txns {
-				if txn.recipient.address == forOwner.address {
+				if txn.recipient == forOwner.address {
 					allAvailableTransactions.append(txn)
 				}
 			}
@@ -114,11 +110,11 @@ class Transaction: NSObject, NSCoding {
 		let inputs = aDecoder.decodeObject(forKey: "inputs") as! [TransactionInput]
 		let outputs = aDecoder.decodeObject(forKey: "outputs") as! [TransactionOutput]
 		let transactionAmount = aDecoder.decodeInt64(forKey: "transactionAmount")
-		let from = aDecoder.decodeObject(forKey: "from") as! Address
-		let senderPubKey = aDecoder.decodeObject(forKey: "senderPubKey") as! CryptoKey
-		let senderSignature = aDecoder.decodeObject(forKey: "senderSignature") as! ClientSignature
+		let from = aDecoder.decodeObject(forKey: "from") as! Data
+		let senderPubKey = aDecoder.decodeObject(forKey: "senderPubKey") as! Data
+		let senderSignature = aDecoder.decodeObject(forKey: "senderSignature") as! Data
 		
-		let recipient = aDecoder.decodeObject(forKey: "recipient") as! ClientSignature
+		let recipient = aDecoder.decodeObject(forKey: "recipient") as! Data
 		let hash = aDecoder.decodeObject(forKey: "hash") as! Data
 		
 		self.init(inputs: inputs, outputs: outputs, transactionAmount: transactionAmount, from: from, senderPubKey: senderPubKey, senderSignature: senderSignature, recipient: recipient, hash: hash)

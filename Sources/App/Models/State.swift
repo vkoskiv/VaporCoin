@@ -45,7 +45,7 @@ class State: Hashable {
 		self.memPool = []
 		self.blockChain = []
 		self.blockChain.append(genesisBlock())
-		//print("\(blockChain.first!.encoded().makeBytes())")
+		print("\(blockChain.first!.encoded().hexString)")
 		self.p2pProtocol = P2PProtocol()
 		self.minerProtocol = MinerProtocol()
 		
