@@ -12,7 +12,9 @@ import Foundation
 final class Block: NSObject, NSCoding {
 	//Block header
 	var prevHash: Data
-	var merkleRoot: MerkleRoot
+	var merkleRoot: Data {
+		return MerkleRoot.getRootHash(fromTransactions: self.txns)
+	}
 	var timestamp: Double //Unix Tstamp
 	var target: Float
 	var nonce: Int64 //256 bit hash
@@ -24,7 +26,6 @@ final class Block: NSObject, NSCoding {
 	
 	override init() {
 		self.prevHash = Data()
-		self.merkleRoot = MerkleRoot()
 		self.timestamp = Date().timeIntervalSince1970
 		self.target = 1
 		self.nonce = 0
@@ -35,9 +36,8 @@ final class Block: NSObject, NSCoding {
 		
 	}
 	
-	init(prevHash: Data, merkleRoot: MerkleRoot, depth: Int, txns: [Transaction], timestamp: Double, difficulty: Float, nonce: Int64, hash: Data) {
+	init(prevHash: Data, depth: Int, txns: [Transaction], timestamp: Double, difficulty: Float, nonce: Int64, hash: Data) {
 		self.prevHash = prevHash
-		self.merkleRoot = merkleRoot
 		self.depth = depth
 		self.txns = txns
 		self.timestamp = timestamp
@@ -88,19 +88,18 @@ final class Block: NSObject, NSCoding {
 	//MARK: Swift encoding logic
 	public convenience required init?(coder aDecoder: NSCoder) {
 		let prevHash = aDecoder.decodeObject(forKey: "prevHash") as! Data
-		let merkleRoot = aDecoder.decodeObject(forKey: "merkleTree") as! MerkleRoot
 		let depth = aDecoder.decodeInteger(forKey: "depth")
 		let txns = aDecoder.decodeObject(forKey: "txns") as! [Transaction]
 		let timestamp = aDecoder.decodeDouble(forKey: "timestamp")
 		let difficulty = aDecoder.decodeFloat(forKey: "difficulty")
 		let nonce = aDecoder.decodeInt64(forKey: "nonce")
 		
-		self.init(prevHash: prevHash, merkleRoot: merkleRoot, depth: depth, txns: txns, timestamp: timestamp, difficulty: difficulty, nonce: nonce, hash: Data())
+		self.init(prevHash: prevHash, depth: depth, txns: txns, timestamp: timestamp, difficulty: difficulty, nonce: nonce, hash: Data())
 	}
 	
 	func encode(with aCoder: NSCoder) {
 		aCoder.encode(prevHash, forKey: "prevHash")
-		aCoder.encode(merkleRoot, forKey: "merkleRoot") //FIXME: Crashes here
+		aCoder.encode(merkleRoot, forKey: "merkleRoot")
 		aCoder.encode(timestamp, forKey: "timestamp")
 		aCoder.encode(target, forKey: "target")
 		aCoder.encode(nonce, forKey: "nonce")
@@ -111,6 +110,6 @@ final class Block: NSObject, NSCoding {
 }
 
 func genesisBlock() -> Block {
-	let genesis = Block(prevHash: Data(), merkleRoot: MerkleRoot(), depth: 0, txns: [], timestamp: 1505278315, difficulty: 1.0, nonce: 0, hash: Data())
+	let genesis = Block(prevHash: Data(), depth: 0, txns: [Transaction()], timestamp: 1505278315, difficulty: 1.0, nonce: 0, hash: Data())
 	return genesis
 }

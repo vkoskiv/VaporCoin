@@ -63,3 +63,18 @@ extension MerkleRoot {
 	}
 	
 }
+
+extension MerkleRoot {
+	static func getRootHash(fromTransactions txns: [Transaction]) -> Data {
+		let tree = buildTree(fromTransactions: txns)
+		var hash = Data()
+		switch tree {
+		case let .Node(hash: rootHash, data: _, left: _, right: _):
+			hash = rootHash
+		case .Empty:
+			print("Failed to create tree!")
+		}
+		
+		return hash.sha256
+	}
+}
