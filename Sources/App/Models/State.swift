@@ -13,9 +13,10 @@ import Sockets
 
 //Current client state
 class State: Hashable {
-	//Connections to other clients
-	//Hostname: Client
+	//Currently connected peers
 	var peers: [TCPJSONClient]
+	//Known hostnames
+	var knownHosts: [String]
 	//Pool of pending transactions to be processed
 	var memPool: [Transaction]
 	
@@ -42,6 +43,11 @@ class State: Hashable {
 	init() {
 		print("Initializing client state")
 		self.peers = []
+		
+		self.knownHosts = []
+		self.knownHosts.append("proteus.vkoskiv.com")
+		self.knownHosts.append("triton.vkoskiv.com")
+		
 		self.memPool = []
 		self.blockChain = []
 		self.blockChain.append(genesisBlock())
@@ -98,13 +104,12 @@ class State: Hashable {
 	}
 	
 	func initConnections() {
-		//Hard-coded, known nodes to start querying state from
-		let proteus = try! TCPInternetSocket(scheme: "coin", hostname: "proteus.vkoskiv.com", port: 6001)
-		let triton  = try! TCPInternetSocket(scheme: "coin", hostname:  "triton.vkoskiv.com", port: 6001)
-		var client = try! TCPJSONClient(proteus)
-		peers.append(client)
-		client = try! TCPJSONClient(triton)
-		peers.append(client)
+		//Hard-coded, known nodes to start querying state from		
+		for hostname in self.knownHosts {
+			let sock = try! TCPInternetSocket(scheme: "coin", hostname: hostname, port: 6001)
+			let conn = try! TCPJSONClient(sock)
+			peers.append(conn)
+		}
 	}
 	
 	var hashValue: Int {
