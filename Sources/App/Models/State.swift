@@ -45,8 +45,9 @@ class State: Hashable {
 		self.peers = []
 		
 		self.knownHosts = []
-		self.knownHosts.append("proteus.vkoskiv.com")
-		self.knownHosts.append("triton.vkoskiv.com")
+		self.knownHosts.append("192.168.1.75")
+		//self.knownHosts.append("proteus.vkoskiv.com")
+		//self.knownHosts.append("triton.vkoskiv.com")
 		
 		self.memPool = []
 		self.blockChain = []
@@ -62,12 +63,16 @@ class State: Hashable {
 		
 		//Listen for requests
 		self.server = try? TCPJSONServer()
-		try? self.server?.start()
+		
+		DispatchQueue.global(qos: .default).async {
+			DispatchQueue.main.async {
+				try? self.server?.start()
+			}
+		}
 		
 		//Set up initial client conns
 		initConnections()
 		queryPeers()
-		
 		
 		//Start syncing on a background thread
 		DispatchQueue.global(qos: .background).async {
@@ -104,8 +109,10 @@ class State: Hashable {
 	}
 	
 	func initConnections() {
-		//Hard-coded, known nodes to start querying state from		
+		//Hard-coded, known nodes to start querying state from
+		print("Initializing connections")
 		for hostname in self.knownHosts {
+			print("Connecting to \(hostname)")
 			let sock = try! TCPInternetSocket(scheme: "coin", hostname: hostname, port: 6001)
 			let conn = try! TCPJSONClient(sock)
 			peers.append(conn)
