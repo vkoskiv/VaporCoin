@@ -65,6 +65,7 @@ public final class JSONServer<StreamType: ServerStream>: CustomServer {
 	                                  attributes: .concurrent)
 	
 	public func start() throws {
+		print("Starting server on port 6001")
 		try stream.bind()
 		try stream.listen(max: listenMax)
 		

@@ -52,7 +52,7 @@ class State: Hashable {
 		self.memPool = []
 		self.blockChain = []
 		self.blockChain.append(genesisBlock())
-		print("\(blockChain.first!.encoded().hexString)")
+		print("\(blockChain.first!.encoded().sha256.hexString)")
 		self.p2pProtocol = P2PProtocol()
 		self.minerProtocol = MinerProtocol()
 		
@@ -66,12 +66,12 @@ class State: Hashable {
 		
 		DispatchQueue.global(qos: .default).async {
 			DispatchQueue.main.async {
+				print("Test")
 				try? self.server?.start()
 			}
 		}
 		
 		//Set up initial client conns
-		
 		DispatchQueue.global(qos: .background).async {
 			DispatchQueue.main.async {
 				self.initConnections()
