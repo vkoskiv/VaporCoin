@@ -114,8 +114,13 @@ class State: Hashable {
 		for hostname in self.knownHosts {
 			print("Connecting to \(hostname)")
 			let sock = try! TCPInternetSocket(scheme: "coin", hostname: hostname, port: 6001)
-			let conn = try! TCPJSONClient(sock)
-			peers.append(conn)
+			var conn: TCPJSONClient
+			do {
+				conn = try TCPJSONClient(sock)
+				peers.append(conn)
+			} catch {
+				print("Failed to connect to \(sock.hostname)")
+			}
 		}
 	}
 	
