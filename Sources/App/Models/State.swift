@@ -106,8 +106,16 @@ class State: Hashable {
 		//Query for new peers to add to list
 		//TODO: A ping request to see if node is alive + versioning
 		print("Querying for more hostnames from peers")
+		var json = JSON()
 		for p in peers {
-			
+			//json = self.p2pProtocol.sendRequest(request: RequestType.getPeers, to: p, nil)
+			//FIXME: Why can't we pass nil to the generic param??
+			json = self.p2pProtocol.sendRequest(request: RequestType.getPeers, to: p, NSNull.self)
+			let hosts: [String] = try! json.get("result")
+			for hostname in hosts {
+				//TODO: Ping and confirm before adding
+				self.knownHosts.append(hostname)
+			}
 		}
 	}
 	

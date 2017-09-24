@@ -13,6 +13,7 @@ public enum RequestType {
 	case getBlock      //Get block
 	case getDifficulty  //Get current difficulty
 	case newTransaction //Send new transaction
+	case getPeers      //Get a list of hostnames
 }
 
 //Simple custom P2P protocol handling
@@ -46,13 +47,13 @@ class P2PProtocol {
 	//JSON request handler
 	func received(json: JSON) -> JSON {
 		var response = JSON()
-		if let msgType = json.object?["msgType"]?.string {
+		if let reqType = json.object?["method"]?.string {
 			do {
-				switch (msgType) {
+				switch (reqType) {
 				case "newBlock": //New block was found and broadcasted by someone
 					response = receivedBlock(block: blockFromJSON(json: json))
 				case "newTransaction":
-					receivedTransaction(txn: transactionFromJSON(json: json))
+					response = receivedTransaction(txn: transactionFromJSON(json: json))
 				case "existingBlock": //Requested some block
 					//TODO
 					return try test()
@@ -65,6 +66,8 @@ class P2PProtocol {
 				case "getDifficulty": //Send difficulty to sender
 					//TODO
 					return try test()
+				case "getPeers":
+					response = receivedGetPeers()
 				default:
 					//TODO
 					return try test()
@@ -75,6 +78,28 @@ class P2PProtocol {
 		}
 		//Send reply
 		return response
+	}
+	
+	func receivedGetPeers() -> JSON {
+		//Reply with all known peers
+		
+		var json = JSON()
+		
+		var structure = [[String: NodeRepresentable]]()
+		structure.append(["error": ""])
+		structure.append(["id": 0])
+		
+		var hosts = [NodeRepresentable]()
+		
+		for host in state.knownHosts {
+			hosts.append(host)
+		}
+		
+		structure.append(["result": hosts])
+		
+		json = try! JSON(node: structure)
+		
+		return json
 	}
 	
 	//Sent requests
@@ -88,6 +113,8 @@ class P2PProtocol {
 			json = broadcastTransaction(txn: param as! Transaction)
 		case .getBlock:
 			json = getBlock(depth: param as! Int)
+		case .getPeers:
+			json = getPeers()
 		default:
 			json = JSON()
 		}
@@ -120,6 +147,14 @@ class P2PProtocol {
 	
 	func getBlock(depth: Int) -> JSON {
 		return JSON()
+	}
+	
+	func getPeers() -> JSON {
+		var json = JSON()
+		try! json.set("method", "getPeers")
+		try! json.set("params", "")
+		try! json.set("id", 0)
+		return json
 	}
 	
 	//Other funcs
@@ -155,8 +190,9 @@ class P2PProtocol {
 		//Called from receivedBlock after verify. Broadcast to everyone except who this came from
 	}
 	
-	func receivedTransaction(txn: Transaction) {
+	func receivedTransaction(txn: Transaction) -> JSON {
 		//Check validity, and then add to mempool
+		return JSON()
 	}
 	
 	func test() throws -> JSON { return JSON() }
