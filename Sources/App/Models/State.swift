@@ -71,8 +71,12 @@ class State: Hashable {
 		}
 		
 		//Set up initial client conns
-		initConnections()
-		queryPeers()
+		
+		DispatchQueue.global(qos: .background).async {
+			DispatchQueue.main.async {
+				self.initConnections()
+			}
+		}
 		
 		//Start syncing on a background thread
 		DispatchQueue.global(qos: .background).async {
@@ -81,7 +85,7 @@ class State: Hashable {
 			}
 		}
 		
-		var pubKey: CryptoKey
+		/*var pubKey: CryptoKey
 		var privKey: CryptoKey
 		do {
 			print("Loading crypto keys")
@@ -91,7 +95,7 @@ class State: Hashable {
 			self.signature = ClientSignature(pub: pubKey, priv: privKey)
 		} catch {
 			print("Crypto keys not found!")
-		}
+		}*/
 	}
 	
 	func startSync() {
@@ -103,6 +107,7 @@ class State: Hashable {
 	func queryPeers() {
 		//Query for new peers to add to list
 		//TODO: A ping request to see if node is alive + versioning
+		print("Querying for more hostnames from peers")
 		for p in peers {
 			
 		}
@@ -117,11 +122,13 @@ class State: Hashable {
 			var conn: TCPJSONClient
 			do {
 				conn = try TCPJSONClient(sock)
+				print("Connected  to \(sock.hostname)!")
 				peers.append(conn)
 			} catch {
 				print("Failed to connect to \(sock.hostname)")
 			}
 		}
+		queryPeers()
 	}
 	
 	var hashValue: Int {

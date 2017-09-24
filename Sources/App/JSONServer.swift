@@ -73,6 +73,8 @@ public final class JSONServer<StreamType: ServerStream>: CustomServer {
 			
 			do {
 				client = try stream.accept()
+				print("New connection from \(client.hostname)")
+				state.knownHosts.append(client.hostname)
 			} catch {
 				print("ClientError")
 				continue
@@ -107,6 +109,7 @@ public final class JSONServer<StreamType: ServerStream>: CustomServer {
 					break main
 				}
 				json = parser.parse()
+				print("New request from \(stream.hostname)")
 			}
 			
 			guard let jsonData = json else {
