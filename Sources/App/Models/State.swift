@@ -64,18 +64,16 @@ class State: Hashable {
 		//Listen for requests
 		self.server = try? TCPJSONServer()
 		
+		/*DispatchQueue.main.async {
+		}*/
+		
 		DispatchQueue.global(qos: .default).async {
-			DispatchQueue.main.async {
-				print("Test")
-				try? self.server?.start()
-			}
+			try? self.server?.start()
 		}
 		
 		//Set up initial client conns
 		DispatchQueue.global(qos: .background).async {
-			DispatchQueue.main.async {
-				self.initConnections()
-			}
+			self.initConnections()
 		}
 		
 		//Start syncing on a background thread
