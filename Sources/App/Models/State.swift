@@ -111,7 +111,10 @@ class State: Hashable {
 			//json = self.p2pProtocol.sendRequest(request: RequestType.getPeers, to: p, nil)
 			//FIXME: Why can't we pass nil to the generic param??
 			json = self.p2pProtocol.sendRequest(request: RequestType.getPeers, to: p, NSNull.self)
-			let hosts: [String] = try! json.get("result")
+			guard let hosts: [String] = try? json.get("result") else {
+				print("Failed to get hosts list")
+				return
+			}
 			for hostname in hosts {
 				//TODO: Ping and confirm before adding
 				self.knownHosts.append(hostname)
