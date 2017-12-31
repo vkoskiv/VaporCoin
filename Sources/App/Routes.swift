@@ -12,10 +12,11 @@ extension Droplet {
 		}
 		
 		//NOTE: We will use JSON-RPC over TCP, instead of WebSockets.
+		//Newer note: We will use WebSockets after all
 		
 		//Set up webSockets
 		//Special WebSocket for a miner connection
-		/*socket("miner") { message, webSocket in
+		socket("miner") { message, webSocket in
 			webSocket.onText = { ws, text in
 				print("Miner msg: " + text)
 				let json = try JSON(bytes: Array(text.utf8))
@@ -24,13 +25,17 @@ extension Droplet {
 		}
 		
 		socket("p2p") { message, webSocket in
-			var peer: PeerState = PeerState()
 			webSocket.onText = { ws, text in
 				print("Received message: " + text)
 				let json = try JSON(bytes: Array(text.utf8))
-				state.p2pProtocol.received(json: json, peer: peer)
+				let response = state.p2pProtocol.received(json: json)
+				do {
+					try ws.send(response.makeBytes())
+				} catch {
+					print("Failed to send reply")
+				}
 			}
-		}*/
+		}
         
         try resource("posts", PostController.self)
     }

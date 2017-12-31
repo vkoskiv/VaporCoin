@@ -13,8 +13,8 @@ import Sockets
 
 //Current client state
 class State: Hashable {
-	//Currently connected peers
-	var peers: [TCPJSONClient]
+	//Currently connected peers and their respective WS
+	var peers: [PeerClient: WebSocket]
 	//Known hostnames
 	var knownHosts: [String]
 	//Pool of pending transactions to be processed
@@ -42,7 +42,7 @@ class State: Hashable {
 	
 	init() {
 		print("Initializing client state")
-		self.peers = []
+		self.peers = [:]
 		
 		self.knownHosts = []
 		self.knownHosts.append("192.168.1.75")
@@ -106,35 +106,35 @@ class State: Hashable {
 		//Query for new peers to add to list
 		//TODO: A ping request to see if node is alive + versioning
 		print("Querying for more hostnames from peers")
-		var json = JSON()
-		for p in peers {
+		for (p, _) in peers {
 			//json = self.p2pProtocol.sendRequest(request: RequestType.getPeers, to: p, nil)
 			//FIXME: Why can't we pass nil to the generic param??
-			json = self.p2pProtocol.sendRequest(request: RequestType.getPeers, to: p, NSNull.self)
-			let hosts: [String] = try! json.get("result")
-			for hostname in hosts {
-				//TODO: Ping and confirm before adding
-				self.knownHosts.append(hostname)
-			}
+			self.p2pProtocol.sendRequest(request: RequestType.getPeers, to: p, NSNull.self)
 		}
 	}
 	
+	//Outbound connections, this should be max 8 connections
 	func initConnections() {
 		//Hard-coded, known nodes to start querying state from
 		print("Initializing connections")
 		for hostname in self.knownHosts {
 			print("Connecting to \(hostname)")
-			let sock = try! TCPInternetSocket(scheme: "coin", hostname: hostname, port: 6001)
-			var conn: TCPJSONClient
+			
+			let sock: TCPInternetSocket
+			
 			do {
-				conn = try TCPJSONClient(sock)
-				print("Connected  to \(sock.hostname)!")
-				peers.append(conn)
+				sock = try! TCPInternetSocket(scheme: "ws", hostname: hostname, port: 6001)
+				try WebSocket.background(to: hostname, using: sock, headers: nil) { (websocket: WebSocket) throws -> Void in
+					//Connected?
+					//Add this socket
+					let newPeer = PeerClient(hostname: hostname)
+					state.peers.updateValue(websocket, forKey: newPeer)
+				}
 			} catch {
-				print("Failed to connect to \(sock.hostname)")
+				print("Failed WebSocket in initConnections, to \(sock.hostname)")
 			}
 		}
-		queryPeers()
+		//queryPeers()
 	}
 	
 	var hashValue: Int {
@@ -149,6 +149,10 @@ class State: Hashable {
 			return Block()
 		}
 		return blocks.first!
+	}
+	
+	func getBlockWithIndex(idx: Int) -> Block {
+		return self.blockChain[idx]
 	}
 	
 	func getLatestBlock() -> Block {

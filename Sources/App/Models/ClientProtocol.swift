@@ -67,7 +67,9 @@ class P2PProtocol {
 					//TODO
 					return try test()
 				case "getPeers":
-					response = receivedGetPeers()
+					response = receivedGetPeers(json: json)
+				case "newPeers":
+					response = receivedPeerList(json: json)
 				default:
 					//TODO
 					return try test()
@@ -80,14 +82,14 @@ class P2PProtocol {
 		return response
 	}
 	
-	func receivedGetPeers() -> JSON {
+	func receivedGetPeers(json: JSON) -> JSON {
 		//Reply with all known peers
 		
-		var json = JSON()
+		var response = JSON()
 		
 		var structure = [[String: NodeRepresentable]]()
 		structure.append(["error": ""])
-		structure.append(["id": 0])
+		structure.append(["id": try! json.get("id")])
 		
 		var hosts = [NodeRepresentable]()
 		
@@ -97,16 +99,32 @@ class P2PProtocol {
 		
 		structure.append(["result": hosts])
 		
-		json = try! JSON(node: structure)
+		response = try! JSON(node: structure)
 		
-		return json
+		return response
+	}
+	
+	func receivedPeerList(json: JSON) -> JSON {
+		let asd: Int = try! json.get("id")
+		print("Received list of peers from \(asd)")
+		let hosts: [String] = try! json.get("result")
+		for hostname in hosts {
+			//TODO: Ping and confirm before adding
+			state.knownHosts.append(hostname)
+		}
+		print("Added \(hosts.count) nodes")
+		
+		var structure = [[String: NodeRepresentable]]()
+		structure.append(["error": ""])
+		structure.append(["id": try! json.get("id")])
+		let response = try! JSON(node: structure)
+		return response
 	}
 	
 	//Sent requests
-	func sendRequest<T>(request: RequestType, to: TCPJSONClient?, _ param: T) -> JSON {
+	func sendRequest<T>(request: RequestType, to recipient: PeerClient?, _ param: T) {
 		
 		var json = JSON()
-		var response = JSON()
 		
 		switch (request) {
 		case .newTransaction:
@@ -119,26 +137,23 @@ class P2PProtocol {
 			json = JSON()
 		}
 		
-		guard to != nil else {
+		if recipient == nil {
 			//Send to all
-			for p in state.peers {
-				do {
-					json = try p.sendRequest(json: json)
-				} catch {
-					print("Failed to send request: \(json.string ?? "oops")")
-				}
+			for (p, _) in state.peers {
+				p.sendRequest(json: json)
 			}
-			return json //Why do we need this???
+		} else {
+			
+			do {
+				try json.set("id", recipient?.id)
+			} catch {
+				print("can't set id param for \(recipient?.id ?? 414141)")
+			}
+			
+			//Send to specific peer
+			recipient?.sendRequest(json: json)
 		}
 		
-		//Send to a specific peer
-		do {
-			response = try to!.sendRequest(json: json)
-		} catch {
-			print("Failed to send request: \(String(describing: json.string)) to \(String(describing: to?.hostname))")
-		}
-		
-		return response
 	}
 	
 	func broadcastTransaction(txn: Transaction) -> JSON {
@@ -153,7 +168,7 @@ class P2PProtocol {
 		var json = JSON()
 		try! json.set("method", "getPeers")
 		try! json.set("params", "")
-		try! json.set("id", 0)
+		//ID is set in sendRequest
 		return json
 	}
 	

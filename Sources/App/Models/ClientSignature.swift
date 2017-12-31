@@ -10,14 +10,14 @@ import Signature
 
 class ClientSignature {
 	
-	var pubKey: CryptoKey? = nil
-	var privKey: CryptoKey? = nil
+	var pubKey: Data? = nil
+	var privKey: Data? = nil
 	
 	var address: Data {
 		return Data()
 	}
 	
-	init(pub: CryptoKey, priv: CryptoKey) {
+	init(pub: Data, priv: Data) {
 		self.pubKey = pub
 		self.privKey = priv
 	}
