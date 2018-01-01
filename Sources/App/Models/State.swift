@@ -25,6 +25,8 @@ class State: Hashable {
 	//And then only store to DB when we TRUST a  block
 	var blockChain: [Block]
 	
+	var clientVersion = "hype-0.1"
+	
 	var signature: ClientSignature? = nil
 
 	var p2pProtocol: P2PProtocol
@@ -45,7 +47,7 @@ class State: Hashable {
 		self.peers = [:]
 		
 		self.knownHosts = []
-		self.knownHosts.append("192.168.1.75")
+		self.knownHosts.append("ws://10.0.1.44:8080/p2p")
 		//self.knownHosts.append("proteus.vkoskiv.com")
 		//self.knownHosts.append("triton.vkoskiv.com")
 		
@@ -61,27 +63,16 @@ class State: Hashable {
 		self.blocksSinceDifficultyUpdate = 1
 		self.blockDepth = 1
 		
-		//Listen for requests
-		self.server = try? TCPJSONServer()
-		
-		/*DispatchQueue.main.async {
-		}*/
-		
-		DispatchQueue.global(qos: .default).async {
-			try? self.server?.start()
-		}
-		
 		//Set up initial client conns
 		DispatchQueue.global(qos: .background).async {
 			self.initConnections()
+			self.startSync()
 		}
 		
 		//Start syncing on a background thread
-		DispatchQueue.global(qos: .background).async {
-			DispatchQueue.main.async {
-				self.startSync()
-			}
-		}
+		/*DispatchQueue.global(qos: .background).async {
+			
+		}*/
 		
 		/*var pubKey: CryptoKey
 		var privKey: CryptoKey
@@ -99,6 +90,7 @@ class State: Hashable {
 	func startSync() {
 		//Query other nodes for blockchain status, and then sync until latest block
 		print("Starting background sync, from block \(state.blockDepth)")
+		self.p2pProtocol.sendRequest(request: .getBlock, to: nil, 0)
 	}
 	
 	//Get new peers AND get current network status (difficulty, block depth)
@@ -120,25 +112,22 @@ class State: Hashable {
 		for hostname in self.knownHosts {
 			print("Connecting to \(hostname)")
 			
-			let sock: TCPInternetSocket
-			
 			do {
-				sock = try! TCPInternetSocket(scheme: "ws", hostname: hostname, port: 6001)
-				try WebSocket.background(to: hostname, using: sock, headers: nil) { (websocket: WebSocket) throws -> Void in
-					//Connected?
-					//Add this socket
+				try WebSocketFactory.shared.connect(to: hostname) { (websocket: WebSocket) throws -> Void in
+					//Connected
 					let newPeer = PeerClient(hostname: hostname)
 					state.peers.updateValue(websocket, forKey: newPeer)
 				}
 			} catch {
-				print("Failed WebSocket in initConnections, to \(sock.hostname)")
+				print(error)
 			}
+			print("Connected to \(hostname)")
 		}
 		//queryPeers()
 	}
 	
 	var hashValue: Int {
-		return self.hashValue
+		return self.version
 	}
 	
 	//MARK: Interact with blockchain

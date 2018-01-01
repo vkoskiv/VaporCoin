@@ -20,10 +20,11 @@ class PeerClient: Hashable {
 	}
 	
 	var hashValue: Int {
-		return self.hashValue
+		return self.id
 	}
 	
 	func sendRequest(json: JSON) {
+		print("Sending \(json)")
 		//Get websocket for this
 		let ws = state.peers[self]
 		do {
