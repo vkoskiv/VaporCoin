@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Signature
 import Vapor
 import Transport
 import Sockets
@@ -32,7 +31,7 @@ class State: Hashable {
 
 	var p2pProtocol: P2PProtocol
 	var minerProtocol: MinerProtocol
-	var server: TCPJSONServer?
+	
 	var outboundConnections: Int {
 		return self.peers.count
 	}

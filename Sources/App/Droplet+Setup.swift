@@ -18,7 +18,7 @@ extension Droplet {
 			
 			while true {
 				let newBlock = Block(prevHash: state.getPreviousBlock().blockHash, depth: state.blockDepth, txns: [Transaction()], timestamp: Date().timeIntervalSince1970, difficulty: 5000, nonce: 0, hash: Data())
-				let minedBlock = miner.startWorker(block: newBlock)
+				let minedBlock = miner.prepareWorker(block: newBlock)
 				state.blockDepth += 1
 				state.blocksSinceDifficultyUpdate += 1
 				state.blockChain.append(minedBlock)

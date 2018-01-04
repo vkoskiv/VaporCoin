@@ -22,7 +22,7 @@ class Miner {
 		self.difficulty = diff
 	}
 	
-	func startWorker(block: Block) -> Block {
+	func prepareWorker(block: Block) -> Block {
 		block.nonce = 0
 		block.blockHash = block.encoded().sha256
 		let minedBlock = mine(block: block)

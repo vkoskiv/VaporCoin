@@ -17,7 +17,7 @@ final class Block: NSObject, NSCoding {
 	}
 	var timestamp: Double //Unix Tstamp
 	var target: Float
-	var nonce: Int64 //256 bit hash
+	var nonce: Int64 //64 bit nonce
 	
 	var depth: Int
 	var txns: [Transaction]

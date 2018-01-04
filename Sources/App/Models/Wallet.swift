@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Signature
 
 //This will contain key loading, signing, funcs to check balance, construct transactions...
 

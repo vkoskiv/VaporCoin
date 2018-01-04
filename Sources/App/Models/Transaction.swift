@@ -7,14 +7,31 @@
 
 import Vapor
 import Foundation
-import Signature
 
 class TransactionInput {
+	var value: Int64
+	var txHash: Data
 	
+	init(value: Int64, hash: Data) {
+		self.value = value
+		self.txHash = hash
+	}
 }
 
 class TransactionOutput {
+	var value: Int64
+	var txHash: Data
 	
+	init(value: Int64, hash: Data) {
+		self.value = value
+		self.txHash = hash
+	}
+}
+
+public enum transactionType {
+	case coinbase //Special, miner reward
+	case normal   //Regular utxo value transaction
+	case data     //Arbitrary data?
 }
 
 class Transaction: NSObject, NSCoding {
