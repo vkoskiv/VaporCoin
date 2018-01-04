@@ -45,8 +45,12 @@ Block header:
 
 ## TODO
 
-- JSON TCP interface for peer-to-peer communication / Done, untested
+- JSON WebSocket interface for peer-to-peer communication / untested
 - Peer discovery
 - JSON-RPC protocol
 - Locally hosted web interface to send and receive transactions, change settings and monitor blockchain status.
-- Miner program. Possibly separate process.
+- Miner program. Possibly separate process. / Implemented, difficulty adjustment needs to be implemented
+- Database logic
+- Proper node syncing
+- Signatures
+- Transactions
