@@ -46,8 +46,12 @@ final class Block: NSObject, NSCoding {
 		self.blockHash = hash
 	}
 	
-	func encoded() -> Data {
+	/*func encoded() -> Data {
 		return NSKeyedArchiver.archivedData(withRootObject: self)
+	}*/
+	
+	func encoded() -> Data {
+		return prevHash + merkleRoot + Data(from: depth) + Data(from: timestamp) + Data(from: target) + Data(from: nonce)
 	}
 	
 	func verify() -> Bool {
@@ -111,5 +115,18 @@ final class Block: NSObject, NSCoding {
 
 func genesisBlock() -> Block {
 	let genesis = Block(prevHash: Data(), depth: 0, txns: [Transaction()], timestamp: 1505278315, difficulty: 1.0, nonce: 0, hash: Data())
+	genesis.blockHash = genesis.encoded().sha256
 	return genesis
+}
+
+extension Data {
+	
+	init<T>(from value: T) {
+		var value = value
+		self.init(buffer: UnsafeBufferPointer(start: &value, count: 1))
+	}
+	
+	func to<T>(type: T.Type) -> T {
+		return self.withUnsafeBytes { $0.pointee }
+	}
 }

@@ -48,14 +48,14 @@ class State: Hashable {
 		self.peers = [:]
 		
 		self.knownHosts = []
-		self.knownHosts.append("ws://10.0.1.44:8080/p2p")
+		self.knownHosts.append("ws://192.168.1.101:8080/p2p")
 		//self.knownHosts.append("proteus.vkoskiv.com")
 		//self.knownHosts.append("triton.vkoskiv.com")
 		
 		self.memPool = []
 		self.blockChain = []
 		self.blockChain.append(genesisBlock())
-		print("GenesisBlockHash: \(blockChain.first!.encoded().sha256.hexString)")
+		print("GenesisBlockHash: \(blockChain.first!.blockHash.hexString)")
 		self.p2pProtocol = P2PProtocol()
 		self.minerProtocol = MinerProtocol()
 		
@@ -64,7 +64,7 @@ class State: Hashable {
 		self.blocksSinceDifficultyUpdate = 1
 		self.blockDepth = 1
 		
-		self.initConnections()
+		//self.initConnections()
 		
 		//Set up initial client conns
 		/*DispatchQueue.global(qos: .background).async {
@@ -109,6 +109,8 @@ class State: Hashable {
 	}
 	
 	//Outbound connections, this should be max 8 connections
+	//Note, that these outbound connections are used *only* for outgoing messages.
+	//All incoming ones are going thru the normal input socket
 	func initConnections() {
 		//Hard-coded, known nodes to start querying state from
 		print("Initializing connections")
@@ -149,6 +151,10 @@ class State: Hashable {
 			return Block()
 		}
 		return blocks.first!
+	}
+	
+	func getPreviousBlock() -> Block {
+		return self.blockChain[self.blockDepth - 1]
 	}
 	
 	func getBlockWithIndex(idx: Int) -> Block {
