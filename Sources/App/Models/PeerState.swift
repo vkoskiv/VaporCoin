@@ -8,13 +8,17 @@
 import Foundation
 import Vapor
 
-class PeerClient: Hashable {
+class PeerState: Hashable {
 	
 	var hostName: String
 	var id: Int
+	var clientVersion: Int
+	var clientType: String
 	
-	init(hostname: String) {
+	init(hostname: String, clientVersion: Int, clientType: String) {
 		self.hostName = hostname
+		self.clientVersion = clientVersion
+		self.clientType = clientType
 		//TODO: Proper ID gen + checks
 		self.id = 4
 	}
@@ -35,6 +39,6 @@ class PeerClient: Hashable {
 	}
 }
 
-func ==(lhs: PeerClient, rhs: PeerClient) -> Bool {
+func ==(lhs: PeerState, rhs: PeerState) -> Bool {
 	return lhs.hashValue == rhs.hashValue
 }

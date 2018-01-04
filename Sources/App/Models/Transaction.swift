@@ -54,12 +54,12 @@ class Transaction: NSObject, NSCoding {
 		self.txnHash = hash
 	}
 	
-	func newTranscation(source: ClientSignature, dest: ClientSignature, input: Int64, output: Int64) -> Transaction {
+	func newTranscation(source: Wallet, dest: Wallet, input: Int64, output: Int64) -> Transaction {
 		//TODO
 		return Transaction()
 	}
 	
-	func getInputs(forOwner: ClientSignature, forAmount: Int64) -> [Transaction] {
+	func getInputs(forOwner: Wallet, forAmount: Int64) -> [Transaction] {
 		//Get inputs
 		//Then map filter out ones that have been spent
 		//for tx in block.txns {

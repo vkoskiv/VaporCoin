@@ -14,7 +14,7 @@ import Sockets
 //Current client state
 class State: Hashable {
 	//Currently connected peers and their respective WS
-	var peers: [PeerClient: WebSocket]
+	var peers: [PeerState: WebSocket]
 	//Known hostnames
 	var knownHosts: [String]
 	//Pool of pending transactions to be processed
@@ -25,9 +25,10 @@ class State: Hashable {
 	//And then only store to DB when we TRUST a  block
 	var blockChain: [Block]
 	
-	var clientVersion = "hype-0.1"
+	var clientVersion = 1
+	var clientType    = "hype-fullnode"
 	
-	var signature: ClientSignature? = nil
+	var signature: Wallet? = nil
 
 	var p2pProtocol: P2PProtocol
 	var minerProtocol: MinerProtocol
@@ -54,7 +55,7 @@ class State: Hashable {
 		self.memPool = []
 		self.blockChain = []
 		self.blockChain.append(genesisBlock())
-		print("\(blockChain.first!.encoded().sha256.hexString)")
+		print("GenesisBlockHash: \(blockChain.first!.encoded().sha256.hexString)")
 		self.p2pProtocol = P2PProtocol()
 		self.minerProtocol = MinerProtocol()
 		
@@ -63,11 +64,13 @@ class State: Hashable {
 		self.blocksSinceDifficultyUpdate = 1
 		self.blockDepth = 1
 		
+		self.initConnections()
+		
 		//Set up initial client conns
-		DispatchQueue.global(qos: .background).async {
+		/*DispatchQueue.global(qos: .background).async {
 			self.initConnections()
 			self.startSync()
-		}
+		}*/
 		
 		//Start syncing on a background thread
 		/*DispatchQueue.global(qos: .background).async {
@@ -110,23 +113,28 @@ class State: Hashable {
 		//Hard-coded, known nodes to start querying state from
 		print("Initializing connections")
 		for hostname in self.knownHosts {
-			print("Connecting to \(hostname)")
-			
-			do {
-				try WebSocketFactory.shared.connect(to: hostname) { (websocket: WebSocket) throws -> Void in
-					//Connected
-					let newPeer = PeerClient(hostname: hostname)
-					state.peers.updateValue(websocket, forKey: newPeer)
+			DispatchQueue.global(qos: .background).async {
+				do {
+					print("Connecting to \(hostname)...")
+					try WebSocketFactory.shared.connect(to: hostname) { (websocket: WebSocket) throws -> Void in
+						print("Connected to \(hostname)")
+						//Connected
+						//TODO: WebSocket pinging and stuff
+						//Here we query the client for clientVersion, type...
+						let newPeer = PeerState(hostname: hostname, clientVersion: 1, clientType: "eee")
+						state.peers.updateValue(websocket, forKey: newPeer)
+					}
+				} catch {
+					print("Failed to connect to \(hostname), error: \(error)")
 				}
-			} catch {
-				print(error)
 			}
-			print("Connected to \(hostname)")
+			
 		}
 		//queryPeers()
 	}
 	
 	var hashValue: Int {
+		//TODO: Get a unique hashvalue
 		return self.version
 	}
 	
@@ -135,6 +143,9 @@ class State: Hashable {
 		let blocks = self.blockChain.filter { $0.blockHash == hash }
 		if blocks.count > 1 {
 			print("Found more than 1 block with this hash. Yer blockchain's fucked.")
+			return Block()
+		} else if blocks.count < 1 {
+			print("Found less than 1 block with this hash.")
 			return Block()
 		}
 		return blocks.first!
@@ -152,7 +163,7 @@ class State: Hashable {
 		//Look at how long last 60 blocks took, and update difficulty
 		let startTime = self.blockChain[self.blockChain.endIndex - 60].timestamp
 		let timeDiff = self.blockChain.last!.timestamp - startTime
-		print("Last 60 blocks took \(timeDiff) seconds")
+		print("Last 60 blocks took \(timeDiff)s, target is 3600s")
 		//Target is 3600s (1 hour)
 		print("Difficulty before: \(self.currentDifficulty)")
 		self.currentDifficulty *= Int64(3600 / timeDiff)

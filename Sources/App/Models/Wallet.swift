@@ -8,7 +8,9 @@
 import Foundation
 import Signature
 
-class ClientSignature {
+//This will contain key loading, signing, funcs to check balance, construct transactions...
+
+class Wallet {
 	
 	var pubKey: Data? = nil
 	var privKey: Data? = nil
@@ -27,12 +29,12 @@ class ClientSignature {
 		self.privKey = nil
 	}
 	
-	func signTransaction(txn: Transaction, priv: ClientSignature) -> Data {
+	func signTransaction(txn: Transaction, priv: Wallet) -> Data {
 		return Data()
 	}
 	
 	//TODO
-	func signMessage(msg: Data, priv: ClientSignature) -> Data {
+	func signMessage(msg: Data, priv: Wallet) -> Data {
 		//let megaRandomBytes = [0x1a, 0x2b, 0x3c, 0x4d, 0x5e, 0x6f]
 		//let ecdsaSHA512Sig = try Signature.sign(message: msg, with: priv.privKey, using: .sha512)
 		//let ecdsaPrivateKey = try! CryptoKey(path: "/path/to/ecdsa_privateKey.pem", component: .privateKey(passphrase: nil))
@@ -42,7 +44,7 @@ class ClientSignature {
 	}
 	
 	//TODO
-	func checkSignature(msg: Data, sign: ClientSignature) -> Bool {
+	func checkSignature(msg: Data, sign: Wallet) -> Bool {
 		//'Decrypt' the signature, and then see if hash matches data
 		return false
 	}

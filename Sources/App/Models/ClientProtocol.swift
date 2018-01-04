@@ -122,7 +122,7 @@ class P2PProtocol {
 	}
 	
 	//Sent requests
-	func sendRequest<T>(request: RequestType, to recipient: PeerClient?, _ param: T) {
+	func sendRequest<T>(request: RequestType, to recipient: PeerState?, _ param: T) {
 		
 		var json = JSON()
 		
