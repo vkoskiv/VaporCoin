@@ -24,6 +24,13 @@ extension Droplet {
 			}
 		}
 		
+		//Socket for lite clients
+		socket("lite") { message, webSocket in
+			webSocket.onText = { ws, text in
+				
+			}
+		}
+		
 		socket("p2p") { message, webSocket in
 			webSocket.onText = { ws, text in
 				print("Received message: " + text)
@@ -36,7 +43,5 @@ extension Droplet {
 				}
 			}
 		}
-        
-        try resource("posts", PostController.self)
     }
 }
