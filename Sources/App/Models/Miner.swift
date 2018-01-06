@@ -18,6 +18,7 @@ class Miner {
 	var timeStamp: Double = Date().timeIntervalSince1970
 	
 	init(coinbase: String, diff: Int64) {
+		print("Starting VaporCoin miner")
 		self.coinbase = coinbase
 		self.difficulty = diff
 	}
@@ -51,7 +52,7 @@ class Miner {
 			block.blockHash = block.encoded().sha256
 		}*/
 		
-		while (!block.blockHash.hexString.hasPrefix("000")) {
+		while (!block.blockHash.hexString.hasPrefix("00")) {
 			block.nonce += 1
 			block.timestamp = Date().timeIntervalSince1970
 			block.blockHash = block.encoded().sha256
