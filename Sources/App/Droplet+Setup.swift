@@ -3,7 +3,7 @@ import Foundation
 
 //Global client state
 let state = State()
-let miningEnabled = false
+let miningEnabled = true
 
 extension Droplet {
     public func setup() throws {
@@ -16,12 +16,16 @@ extension Droplet {
 			let miner = Miner(coinbase: "asdf", diff: 5000)
 			//Craft a new block to test mining with
 			
-			while true {
+			let myGroup = DispatchGroup()
+			
+			for i in 1...10 {
+				print(i)
 				let newBlock = Block(prevHash: state.getPreviousBlock().blockHash, depth: state.blockDepth, txns: [Transaction()], timestamp: Date().timeIntervalSince1970, difficulty: 5000, nonce: 0, hash: Data())
-				let minedBlock = miner.prepareWorker(block: newBlock)
-				state.blockDepth += 1
-				state.blocksSinceDifficultyUpdate += 1
-				state.blockChain.append(minedBlock)
+				myGroup.enter()
+				miner.mineBlock(block: newBlock) { foundBlock in
+					miner.blockFound(block: foundBlock) //Update state, print output
+					myGroup.leave()
+				}
 			}
 		}
     }

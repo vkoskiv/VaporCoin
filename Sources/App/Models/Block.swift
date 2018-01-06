@@ -12,6 +12,7 @@ import Foundation
 final class Block: NSObject, NSCoding {
 	//Block header
 	var prevHash: Data
+	//FIXME: merkleRoot is computed every single time. Find a way to set+store it whenever transactions are altered.
 	var merkleRoot: Data {
 		return MerkleRoot.getRootHash(fromTransactions: self.txns)
 	}
