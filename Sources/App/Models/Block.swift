@@ -18,12 +18,16 @@ final class Block: NSObject, NSCoding {
 	}
 	var timestamp: Double //Unix Tstamp
 	var target: Float
-	var nonce: Int64 //64 bit nonce
+	var nonce: UInt64 //64 bit nonce
 	
 	var depth: Int
 	var txns: [Transaction]
 	
 	var blockHash: Data
+	
+	func newCopy() -> Block {
+		return Block(prevHash: self.prevHash, depth: self.depth, txns: self.txns, timestamp: self.timestamp, difficulty: self.target, nonce: self.nonce, hash: self.blockHash)
+	}
 	
 	override init() {
 		self.prevHash = Data()
@@ -37,7 +41,7 @@ final class Block: NSObject, NSCoding {
 		
 	}
 	
-	init(prevHash: Data, depth: Int, txns: [Transaction], timestamp: Double, difficulty: Float, nonce: Int64, hash: Data) {
+	init(prevHash: Data, depth: Int, txns: [Transaction], timestamp: Double, difficulty: Float, nonce: UInt64, hash: Data) {
 		self.prevHash = prevHash
 		self.depth = depth
 		self.txns = txns
@@ -97,7 +101,7 @@ final class Block: NSObject, NSCoding {
 		let txns = aDecoder.decodeObject(forKey: "txns") as! [Transaction]
 		let timestamp = aDecoder.decodeDouble(forKey: "timestamp")
 		let difficulty = aDecoder.decodeFloat(forKey: "difficulty")
-		let nonce = aDecoder.decodeInt64(forKey: "nonce")
+		let nonce = aDecoder.decodeInt64(forKey: "nonce") as! UInt64
 		
 		self.init(prevHash: prevHash, depth: depth, txns: txns, timestamp: timestamp, difficulty: difficulty, nonce: nonce, hash: Data())
 	}
@@ -121,6 +125,12 @@ func genesisBlock() -> Block {
 }
 
 extension Data {
+	
+	var binaryString: String {
+		return self.reduce("") { (acc, byte) -> String in
+			acc + String(byte, radix: 2)
+		}
+	}
 	
 	init<T>(from value: T) {
 		var value = value

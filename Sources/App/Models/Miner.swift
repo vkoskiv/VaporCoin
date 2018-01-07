@@ -19,10 +19,14 @@ class Miner {
 	var nonce: Int32 = 0
 	var timeStamp: Double = Date().timeIntervalSince1970
 	
-	init(coinbase: String, diff: Int64) {
-		print("Starting VaporCoin miner")
+	//Hardware params
+	var threadCount: Int = 1
+	
+	init(coinbase: String, diff: Int64, threadCount: Int) {
+		print("Starting VaporCoin miner with \(threadCount) threads")
 		self.coinbase = coinbase
 		self.difficulty = diff
+		self.threadCount = threadCount
 	}
 	
 	func mineBlock(block: Block, completion: @escaping (Block) -> Void) {
@@ -33,16 +37,19 @@ class Miner {
 		}
 	}
 	
-	//TODO: Make findHash multi-threaded, and add stuff to update the merkleRoot timestamp periodically
+	//TODO: add stuff to update the merkleRoot and timestamp periodically
+	//TODO: Implement proper difficulty. Perhaps HashCash approach for now, fractional later.
 	func findHash(block: Block, completion: @escaping (Block) -> Void) {
-		//Just run the hash till it's found with current diff
-		//TODO: Update txns, timestamp...
 		
 		var blockIsFound = false
 		
-		DispatchQueue.global(qos: .userInitiated).async {
-			let candidate = block
-			while (!candidate.blockHash.hexString.hasPrefix("00")) {
+		DispatchQueue.concurrentPerform(iterations: threadCount) { threadID in
+			let candidate = block.newCopy()
+			
+			//Start each thread with a nonce at different spot
+			candidate.nonce = UInt64(threadID) * (UINT64_MAX/UInt64(threadCount))
+			
+			while (!candidate.blockHash.binaryString.hasPrefix("0000")) {
 				candidate.nonce += 1
 				candidate.timestamp = Date().timeIntervalSince1970
 				candidate.blockHash = candidate.encoded().sha256
@@ -50,8 +57,13 @@ class Miner {
 					break
 				}
 			}
-			blockIsFound = true
-			completion(candidate)
+			
+			//TODO: Add mutex for this even though it's super unlikely two threads find a hash at the EXACT same time
+			if !blockIsFound {
+				print("Block found by thread #\(threadID)")
+				blockIsFound = true
+				completion(candidate)
+			}
 		}
 	}
 	
@@ -62,13 +74,13 @@ class Miner {
 		formatter.dateFormat = "dd-MM-YYYY hh:mm:ss"
 		let dateString = formatter.string(from: date)
 		
-		print("Block hash      : \(block.blockHash.hexString)")
-		print("Block prevHash  : \(block.prevHash.hexString)")
-		print("Block nonce     : \(block.nonce)")
-		print("Block depth     : \(block.depth)")
-		print("Block merkleRoot: \(block.merkleRoot.hexString)")
-		print("Block timestamp : \(block.timestamp) (\(dateString))")
-		print("Block targetDiff: \(block.target)\n")
+		print("prevHash  : \(block.prevHash.hexString)")
+		print("hash      : \(block.blockHash.hexString)")
+		print("nonce     : \(block.nonce)")
+		print("depth     : \(block.depth)")
+		print("merkleRoot: \(block.merkleRoot.hexString)")
+		print("timestamp : \(block.timestamp) (\(dateString))")
+		print("targetDiff: \(block.target)\n")
 		
 		//Update state
 		state.blockDepth += 1
