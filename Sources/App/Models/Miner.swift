@@ -49,7 +49,7 @@ class Miner {
 			//Start each thread with a nonce at different spot
 			candidate.nonce = UInt64(threadID) * (UINT64_MAX/UInt64(threadCount))
 			
-			while (!candidate.blockHash.binaryString.hasPrefix("0000")) {
+			while (!candidate.blockHash.binaryString.hasPrefix("00")) {
 				candidate.nonce += 1
 				candidate.timestamp = Date().timeIntervalSince1970
 				candidate.blockHash = candidate.encoded().sha256
@@ -76,6 +76,7 @@ class Miner {
 		
 		print("prevHash  : \(block.prevHash.hexString)")
 		print("hash      : \(block.blockHash.hexString)")
+		print("binHash   : \(block.blockHash.binaryString)")
 		print("nonce     : \(block.nonce)")
 		print("depth     : \(block.depth)")
 		print("merkleRoot: \(block.merkleRoot.hexString)")

@@ -124,20 +124,12 @@ func genesisBlock() -> Block {
 	return genesis
 }
 
-extension Data {
-	
-	var binaryString: String {
-		return self.reduce("") { (acc, byte) -> String in
-			acc + String(byte, radix: 2)
+/*extension String {
+	func pad(toSize: Int) -> String {
+		var padded = self
+		for _ in 0..<(toSize - self.characters.count) {
+			padded = "0" + padded
 		}
+		return padded
 	}
-	
-	init<T>(from value: T) {
-		var value = value
-		self.init(buffer: UnsafeBufferPointer(start: &value, count: 1))
-	}
-	
-	func to<T>(type: T.Type) -> T {
-		return self.withUnsafeBytes { $0.pointee }
-	}
-}
+}*/
