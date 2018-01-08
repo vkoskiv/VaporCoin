@@ -9,17 +9,21 @@ import Foundation
 import Crypto
 
 extension Data {
+	
+	//Properly working implementations courtesy of Zsolt Váradi
+	
 	//Return a hex string representation of a Data object
 	var hexString: String {
-		return self.map{String($0, radix: 16)}.joined()
+		return map { String($0, radix: 16).leftPadding(toLength: 2, withPad: "0") }.joined()
 	}
 	
+	//Return a binary string representation of a Data object
 	var binaryString: String {
-		return self.map{String($0, radix: 2)}.joined()
+		return map { String($0, radix: 2).leftPadding(toLength: 8, withPad: "0") }.joined()
 	}
 	
 	var sha256: Data {
-		return Data(try! Hash.make(.sha256, self))
+		return Data(bytes: try! Hash.make(.sha256, self), count: 32)
 	}
 }
 
@@ -32,6 +36,17 @@ extension Data {
 	
 	func to<T>(type: T.Type) -> T {
 		return self.withUnsafeBytes { $0.pointee }
+	}
+}
+
+extension String {
+	func leftPadding(toLength: Int, withPad character: Character) -> String {
+		let stringLength = self.characters.count
+		if stringLength < toLength {
+			return String(repeatElement(character, count: toLength - stringLength)) + self
+		} else {
+			return String(self.suffix(toLength))
+		}
 	}
 }
 

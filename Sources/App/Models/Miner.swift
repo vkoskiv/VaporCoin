@@ -49,7 +49,7 @@ class Miner {
 			//Start each thread with a nonce at different spot
 			candidate.nonce = UInt64(threadID) * (UINT64_MAX/UInt64(threadCount))
 			
-			while (!candidate.blockHash.binaryString.hasPrefix("00")) {
+			while (!candidate.blockHash.binaryString.hasPrefix("00000000000000")) {
 				candidate.nonce += 1
 				candidate.timestamp = Date().timeIntervalSince1970
 				candidate.blockHash = candidate.encoded().sha256
