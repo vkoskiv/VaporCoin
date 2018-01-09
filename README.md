@@ -58,6 +58,13 @@ Block header:
 ## Getting started
 
     brew install openssl
-    swift build -Xswiftc -I/usr/local/opt/openssl/include -Xlinker -L/usr/local/opt/openssl/lib
-    swift package -Xswiftc -I/usr/local/opt/openssl/include -Xlinker -L/usr/local/opt/openssl/lib generate-xcodeproj
-    .build/debug/Run
+    brew install vapor/tap/vapor
+    vapor update
+    vapor build 
+    vapor run
+
+
+
+##  Difficulty Factor
+   To mine a block, you can drop down the difficulty by removing zeroes here:
+   while (!candidate.blockHash.binaryString.hasPrefix("000000000000000000000000000000")) 
