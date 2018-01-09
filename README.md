@@ -54,3 +54,10 @@ Block header:
 - Proper node syncing
 - Signatures
 - Transactions
+
+## Getting started
+
+    brew install openssl
+    swift build -Xswiftc -I/usr/local/opt/openssl/include -Xlinker -L/usr/local/opt/openssl/lib
+    swift package -Xswiftc -I/usr/local/opt/openssl/include -Xlinker -L/usr/local/opt/openssl/lib generate-xcodeproj
+    .build/debug/Run
