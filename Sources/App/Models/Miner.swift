@@ -31,10 +31,16 @@ class Miner {
 	
 	func mineBlock(block: Block, completion: @escaping (Block) -> Void) {
 		block.nonce = 0
-		block.blockHash = block.encoded().sha256
+		block.blockHash = block.encoded.sha256
 		findHash(block: block) { newBlock in
 			completion(newBlock)
 		}
+	}
+	
+	func checkDiff(block: Block, difficulty: Double) -> Bool {
+		//Check difficulty. Return true if hash is less than or equal to current diff (Valid)
+		
+		return false
 	}
 	
 	//TODO: add stuff to update the merkleRoot and timestamp periodically
@@ -49,11 +55,13 @@ class Miner {
 			//Start each thread with a nonce at different spot
 			candidate.nonce = UInt64(threadID) * (UINT64_MAX/UInt64(threadCount))
 			
+			//difficulty = log2(difficulty) + 32
+			
 			//TODO: Find a more efficient way to check prefix zeroes.
-			while (!candidate.blockHash.binaryString.hasPrefix("000000000000000000000000000000")) {
+			while (!candidate.blockHash.binaryString.hasPrefix("00000000000000000000000000000000")) {
 				candidate.nonce += 1
 				candidate.timestamp = Date().timeIntervalSince1970
-				candidate.blockHash = candidate.encoded().sha256
+				candidate.blockHash = candidate.encoded.sha256
 				if blockIsFound {
 					break
 				}

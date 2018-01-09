@@ -55,14 +55,14 @@ final class Block: NSObject, NSCoding {
 		return NSKeyedArchiver.archivedData(withRootObject: self)
 	}*/
 	
-	func encoded() -> Data {
+	var encoded: Data {
 		return prevHash + merkleRoot + Data(from: depth) + Data(from: timestamp) + Data(from: target) + Data(from: nonce)
 	}
 	
 	func verify() -> Bool {
 		//Verify the validity of a block
 		//Check that the reported hash matches
-		let testHash = self.encoded().sha256
+		let testHash = self.encoded.sha256
 		if self.blockHash != testHash {
 			print("Block hash doesn't match")
 			return false
@@ -120,7 +120,7 @@ final class Block: NSObject, NSCoding {
 
 func genesisBlock() -> Block {
 	let genesis = Block(prevHash: Data(), depth: 0, txns: [Transaction()], timestamp: 1505278315, difficulty: 1.0, nonce: 0, hash: Data())
-	genesis.blockHash = genesis.encoded().sha256
+	genesis.blockHash = genesis.encoded.sha256
 	return genesis
 }
 
