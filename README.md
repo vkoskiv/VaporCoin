@@ -45,15 +45,16 @@ Block header:
 
 ## TODO
 
-- JSON WebSocket interface for peer-to-peer communication / untested
+- JSON WebSocket p2p communication / Incomplete
 - Peer discovery
-- JSON-RPC protocol
 - Locally hosted web interface to send and receive transactions, change settings and monitor blockchain status.
-- Miner program. Possibly separate process. / Implemented, difficulty adjustment needs to be implemented
+- Miner / Implemented, needs work
+- Fractional difficulty adjustment (Swift can't deal with 256bit uints)
 - Database logic
 - Proper node syncing
-- Signatures
-- Transactions
+- ECDSA Signatures, key management (Wallet.swift)
+- UTXO Transactions
+- Establish consensus
 
 ## Getting started
 
