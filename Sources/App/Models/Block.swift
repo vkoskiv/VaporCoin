@@ -18,7 +18,7 @@ class Block: NSObject, NSCoding {
 	}
 	var timestamp: Double //Unix Tstamp
 	var target: Float
-	var nonce: UInt64 //64 bit nonce
+	var nonce: UInt32 //32 bit nonce
 	
 	var depth: Int
 	var txns: [Transaction]
@@ -41,7 +41,7 @@ class Block: NSObject, NSCoding {
 		
 	}
 	
-	init(prevHash: Data, depth: Int, txns: [Transaction], timestamp: Double, difficulty: Float, nonce: UInt64, hash: Data) {
+	init(prevHash: Data, depth: Int, txns: [Transaction], timestamp: Double, difficulty: Float, nonce: UInt32, hash: Data) {
 		self.prevHash = prevHash
 		self.depth = depth
 		self.txns = txns
@@ -66,7 +66,7 @@ class Block: NSObject, NSCoding {
 		let txns = aDecoder.decodeObject(forKey: "txns") as! [Transaction]
 		let timestamp = aDecoder.decodeDouble(forKey: "timestamp")
 		let difficulty = aDecoder.decodeFloat(forKey: "difficulty")
-		let nonce = aDecoder.decodeInt64(forKey: "nonce") as! UInt64
+		let nonce = aDecoder.decodeInt32(forKey: "nonce") as! UInt32
 		
 		self.init(prevHash: prevHash, depth: depth, txns: txns, timestamp: timestamp, difficulty: difficulty, nonce: nonce, hash: Data())
 	}
@@ -88,13 +88,3 @@ func genesisBlock() -> Block {
 	genesis.blockHash = genesis.encoded.sha256
 	return genesis
 }
-
-/*extension String {
-	func pad(toSize: Int) -> String {
-		var padded = self
-		for _ in 0..<(toSize - self.characters.count) {
-			padded = "0" + padded
-		}
-		return padded
-	}
-}*/

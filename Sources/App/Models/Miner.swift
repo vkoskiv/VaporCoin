@@ -53,7 +53,7 @@ class Miner {
 			let candidate = block.newCopy()
 			
 			//Start each thread with a nonce at different spot
-			candidate.nonce = UInt64(threadID) * (UINT64_MAX/UInt64(threadCount))
+			candidate.nonce = UInt32(threadID) * (UINT32_MAX/UInt32(threadCount))
 			
 			//difficulty = log2(difficulty) + 32
 			
