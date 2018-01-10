@@ -37,9 +37,9 @@ public enum transactionType {
 class Transaction: NSObject, NSCoding {
 	
 	// 100,000,000 = 1.0 VaporCoins
-	var inputs: [TransactionInput]
-	var outputs: [TransactionOutput]
-	var transactionAmount: Int64
+	
+	var inputs: [Transaction]
+	var outputs: [Transaction]
 	
 	var from: Data
 	var senderPubKey: Data
@@ -49,7 +49,6 @@ class Transaction: NSObject, NSCoding {
 	var txnHash: Data
 	
 	override init() {
-		self.transactionAmount = 0
 		self.inputs = []
 		self.outputs = []
 		self.from = Data()
@@ -60,10 +59,9 @@ class Transaction: NSObject, NSCoding {
 		self.txnHash = Data()
 	}
 	
-	init(inputs: [TransactionInput], outputs: [TransactionOutput], transactionAmount: Int64, from: Data, senderPubKey: Data, senderSignature: Data, recipient: Data, hash: Data) {
+	init(inputs: [Transaction], outputs: [Transaction], from: Data, senderPubKey: Data, senderSignature: Data, recipient: Data, hash: Data) {
 		self.inputs = inputs
 		self.outputs = outputs
-		self.transactionAmount = transactionAmount
 		self.from = from
 		self.senderPubKey = senderPubKey
 		self.senderSignature = senderSignature
@@ -73,6 +71,11 @@ class Transaction: NSObject, NSCoding {
 	
 	func newTranscation(source: Wallet, dest: Wallet, input: Int64, output: Int64) -> Transaction {
 		//TODO
+		
+		//Get valid inputs
+		//Construct valid outputs
+		//Construct transaction
+		
 		return Transaction()
 	}
 	
@@ -99,6 +102,14 @@ class Transaction: NSObject, NSCoding {
 		}
 		
 		//Get all spent transactions
+		for block in state.blockChain {
+			for txn in block.txns {
+				if txn.senderPubKey == forOwner.pubKey {
+					
+				}
+			}
+		}
+		
 		/*for block in state.blockChain {
 			for txn in block.txns {
 				if txn.senderPubKey == forOwner.pubKey {
@@ -110,7 +121,7 @@ class Transaction: NSObject, NSCoding {
 		return [Transaction()]
 	}
 	
-	func verify() -> Bool {
+	func verifyTransaction() -> Bool {
 		//Check that output <= input
 		//Check timestamp
 		//Check addresses?
@@ -124,9 +135,8 @@ class Transaction: NSObject, NSCoding {
 	//MARK: Swift encoding logic
 	
 	public convenience required init?(coder aDecoder: NSCoder) {
-		let inputs = aDecoder.decodeObject(forKey: "inputs") as! [TransactionInput]
-		let outputs = aDecoder.decodeObject(forKey: "outputs") as! [TransactionOutput]
-		let transactionAmount = aDecoder.decodeInt64(forKey: "transactionAmount")
+		let inputs = aDecoder.decodeObject(forKey: "inputs") as! [Transaction]
+		let outputs = aDecoder.decodeObject(forKey: "outputs") as! [Transaction]
 		let from = aDecoder.decodeObject(forKey: "from") as! Data
 		let senderPubKey = aDecoder.decodeObject(forKey: "senderPubKey") as! Data
 		let senderSignature = aDecoder.decodeObject(forKey: "senderSignature") as! Data
@@ -134,13 +144,12 @@ class Transaction: NSObject, NSCoding {
 		let recipient = aDecoder.decodeObject(forKey: "recipient") as! Data
 		let hash = aDecoder.decodeObject(forKey: "hash") as! Data
 		
-		self.init(inputs: inputs, outputs: outputs, transactionAmount: transactionAmount, from: from, senderPubKey: senderPubKey, senderSignature: senderSignature, recipient: recipient, hash: hash)
+		self.init(inputs: inputs, outputs: outputs, from: from, senderPubKey: senderPubKey, senderSignature: senderSignature, recipient: recipient, hash: hash)
 	}
 	
 	func encode(with aCoder: NSCoder) {
 		aCoder.encode(inputs, forKey: "inputs")
 		aCoder.encode(outputs, forKey: "outputs")
-		aCoder.encode(transactionAmount, forKey: "transactionAmount")
 		aCoder.encode(from, forKey: "from")
 		aCoder.encode(senderPubKey, forKey: "senderPubKey")
 		aCoder.encode(senderSignature, forKey: "senderSignature")

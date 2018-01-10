@@ -7,13 +7,14 @@
 
 import Foundation
 
-//This will contain key loading, signing, funcs to check balance, construct transactions...
+//This will contain key loading, signing, funcs to check balance...
 
 class Wallet {
 	
 	var pubKey: Data? = nil
 	var privKey: Data? = nil
 	
+	//TODO: Make this a calculated value, ripemd160 of pubkey?
 	var address: Data {
 		return Data()
 	}
