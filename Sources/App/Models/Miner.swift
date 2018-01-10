@@ -55,7 +55,7 @@ class Miner {
 			
 			DispatchQueue.concurrentPerform(iterations: self.threadCount) { threadID in
 				taskGroup.enter()
-				
+				var blockIsFound = false
 				let candidate = block.newCopy()
 				
 				//Start each thread with a nonce at different spot
@@ -66,12 +66,17 @@ class Miner {
 					candidate.nonce += 1
 					candidate.timestamp = Date().timeIntervalSince1970
 					candidate.blockHash = candidate.encoded.sha256
+					if blockIsFound {
+						break
+					}
 				}
 				
-				print("Block found by thread #\(threadID)")
-				completion(candidate)
-				taskGroup.leave()
-				
+				if !blockIsFound {
+					print("Block found by thread #\(threadID)")
+					blockIsFound = true
+					completion(candidate)
+					taskGroup.leave()
+				}
 			}
 		}
 	}
@@ -86,10 +91,10 @@ class Miner {
 		print("prevHash  : \(block.prevHash.hexString)")
 		print("hash      : \(block.blockHash.hexString)")
 		print("nonce     : \(block.nonce)")
-		print("depth     : \(block.depth)")
 		print("merkleRoot: \(block.merkleRoot.hexString)")
 		print("timestamp : \(block.timestamp) (\(dateString))")
 		print("targetDiff: \(block.target)\n")
+		print("blockDepth: \(block.depth)\n")
 		
 		//Update state
 		state.blockDepth += 1
@@ -98,4 +103,5 @@ class Miner {
 		//TODO: Broadcast block, do checks, and a ton of other stuffs
 		state.blockChain.append(block)
 	}
+	
 }
