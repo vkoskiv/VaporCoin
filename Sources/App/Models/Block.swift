@@ -119,7 +119,7 @@ final class Block: NSObject, NSCoding {
 }
 
 func genesisBlock() -> Block {
-	let genesis = Block(prevHash: Data(), depth: 0, txns: [Transaction()], timestamp: 1505278315, difficulty: 1.0, nonce: 0, hash: Data())
+	let genesis = Block(prevHash: Data(Bytes(repeatElement(0, count: 32))), depth: 0, txns: [Transaction()], timestamp: 1505278315, difficulty: 1.0, nonce: 0, hash: Data())
 	genesis.blockHash = genesis.encoded.sha256
 	return genesis
 }
