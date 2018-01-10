@@ -58,7 +58,7 @@ class Miner {
 			//difficulty = log2(difficulty) + 32
 			
 			//TODO: Find a more efficient way to check prefix zeroes.
-			while (!candidate.blockHash.binaryString.hasPrefix("00000000000000000000000000000000")) {
+			while (!candidate.blockHash.binaryString.hasPrefix("0000000000000000000000")) {
 				candidate.nonce += 1
 				candidate.timestamp = Date().timeIntervalSince1970
 				candidate.blockHash = candidate.encoded.sha256
