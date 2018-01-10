@@ -47,36 +47,31 @@ class Miner {
 	//TODO: Implement proper difficulty. Perhaps HashCash approach for now, fractional later.
 	func findHash(block: Block, completion: @escaping (Block) -> Void) {
 		
+		var blockIsFound = false
 		
-		let concurrentQueue = DispatchQueue(label: "hashQueue", attributes: .concurrent)
-		let taskGroup = DispatchGroup()
-		
-		concurrentQueue.async {
+		DispatchQueue.concurrentPerform(iterations: threadCount) { threadID in
+			let candidate = block.newCopy()
 			
-			DispatchQueue.concurrentPerform(iterations: self.threadCount) { threadID in
-				taskGroup.enter()
-				var blockIsFound = false
-				let candidate = block.newCopy()
-				
-				//Start each thread with a nonce at different spot
-				candidate.nonce = UInt32(threadID) * (UINT32_MAX/UInt32(self.threadCount))
-				
-				//TODO: Find a more efficient way to check prefix zeroes.
-				while (!candidate.blockHash.binaryString.hasPrefix(self.diffBits)) {
-					candidate.nonce += 1
-					candidate.timestamp = Date().timeIntervalSince1970
-					candidate.blockHash = candidate.encoded.sha256
-					if blockIsFound {
-						break
-					}
+			//Start each thread with a nonce at different spot
+			candidate.nonce = UInt32(threadID) * (UINT32_MAX/UInt32(threadCount))
+			
+			//difficulty = log2(difficulty) + 32
+			
+			//TODO: Find a more efficient way to check prefix zeroes.
+			while (!candidate.blockHash.binaryString.hasPrefix(self.diffBits)) {
+				candidate.nonce += 1
+				candidate.timestamp = Date().timeIntervalSince1970
+				candidate.blockHash = candidate.encoded.sha256
+				if blockIsFound {
+					break
 				}
-				
-				if !blockIsFound {
-					print("Block found by thread #\(threadID)")
-					blockIsFound = true
-					completion(candidate)
-					taskGroup.leave()
-				}
+			}
+			
+			//TODO: Add mutex for this even though it's super unlikely two threads find a hash at the EXACT same time
+			if !blockIsFound {
+				print("Block found by thread #\(threadID)")
+				blockIsFound = true
+				completion(candidate)
 			}
 		}
 	}
@@ -91,10 +86,10 @@ class Miner {
 		print("prevHash  : \(block.prevHash.hexString)")
 		print("hash      : \(block.blockHash.hexString)")
 		print("nonce     : \(block.nonce)")
+		print("depth     : \(block.depth)")
 		print("merkleRoot: \(block.merkleRoot.hexString)")
 		print("timestamp : \(block.timestamp) (\(dateString))")
 		print("targetDiff: \(block.target)\n")
-		print("blockDepth: \(block.depth)\n")
 		
 		//Update state
 		state.blockDepth += 1

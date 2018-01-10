@@ -22,16 +22,13 @@ class State: Hashable {
 	//For now, just a in-memory array.
 	//Eventually have an in-memory queue of an array of arrays of blocks
 	//And then only store to DB when we TRUST a  block
-	
-	private var internalChain :  [Block] = []
-	
-	var blockChain = SynchronizedArray<Block>()
+	var blockChain: [Block]
 	
 	var clientVersion = 1
 	var clientType    = "hype-fullnode"
 	
 	var signature: Wallet? = nil
-	
+
 	var p2pProtocol: P2PProtocol
 	var minerProtocol: MinerProtocol
 	
@@ -43,22 +40,7 @@ class State: Hashable {
 	
 	var currentDifficulty: Int64
 	var blocksSinceDifficultyUpdate: Int
-	
-	private var _blockDepth:Int = 0
-	var blockDepth:Int{
-		get {
-			return blockChain.queue.sync {
-				_blockDepth
-			}
-		}
-		set {
-			blockChain.queue.sync {
-				_blockDepth = newValue
-			}
-			
-		}
-	}
-	
+	var blockDepth: Int
 	
 	init() {
 		print("Initializing client state")
@@ -70,7 +52,7 @@ class State: Hashable {
 		//self.knownHosts.append("triton.vkoskiv.com")
 		
 		self.memPool = []
-		self.blockChain = SynchronizedArray<Block>()
+		self.blockChain = []
 		self.blockChain.append(genesisBlock())
 		print("GenesisBlockHash: \(blockChain.first!.blockHash.hexString)")
 		self.p2pProtocol = P2PProtocol()
@@ -91,7 +73,7 @@ class State: Hashable {
 		
 		//Start syncing on a background thread
 		/*DispatchQueue.global(qos: .background).async {
-		
+			
 		}*/
 		
 		/*var pubKey: CryptoKey
@@ -100,7 +82,7 @@ class State: Hashable {
 			print("Loading crypto keys")
 			pubKey = try CryptoKey(path: "/Users/vkoskiv/coinkeys/public.pem", component: .publicKey)
 			privKey = try CryptoKey(path: "/Users/vkoskiv/coinkeys/private.pem", component: .privateKey(passphrase:nil))
-		
+			
 			self.signature = ClientSignature(pub: pubKey, priv: privKey)
 		} catch {
 			print("Crypto keys not found!")
@@ -159,7 +141,7 @@ class State: Hashable {
 	
 	//MARK: Interact with blockchain
 	func getBlockWithHash(hash: Data) -> Block {
-		let blocks = self.blockChain.syncFilter { $0.blockHash == hash }
+		let blocks = self.blockChain.filter { $0.blockHash == hash }
 		if blocks.count > 1 {
 			print("Found more than 1 block with this hash. Yer blockchain's fucked.")
 			return Block()
@@ -171,15 +153,7 @@ class State: Hashable {
 	}
 	
 	func getPreviousBlock() -> Block {
-		if self.blockChain.count > self.blockDepth - 1{
-			return self.blockChain[self.blockDepth - 1]
-		}else{
-			print("WARNING - self.blockDepth -1 < self.blockChain.count ")
-			print("self.blockChain.count:",self.blockChain.count)
-			//            print("self.blockDepth:",self.blockDepth)
-			return Block()
-		}
-		
+		return self.blockChain[self.blockDepth - 1]
 	}
 	
 	func getBlockWithIndex(idx: Int) -> Block {
