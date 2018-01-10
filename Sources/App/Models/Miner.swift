@@ -51,28 +51,23 @@ class Miner {
             
             DispatchQueue.concurrentPerform(iterations: self.threadCount) { threadID in
                 taskGroup.enter()
-                var blockIsFound = false
+
                 let candidate = block.newCopy()
                 
                 //Start each thread with a nonce at different spot
                 candidate.nonce = UInt64(threadID) * (UINT64_MAX/UInt64(self.threadCount))
                 
                 //TODO: Find a more efficient way to check prefix zeroes.
-                while (!candidate.blockHash.binaryString.hasPrefix("00000000000000000")) {
+                while (!candidate.blockHash.binaryString.hasPrefix("00")) {
                     candidate.nonce += 1
                     candidate.timestamp = Date().timeIntervalSince1970
                     candidate.blockHash = candidate.encoded().sha256
-                    if blockIsFound {
-                        break
-                    }
                 }
+
+                print("Block found by thread #\(threadID)")
+                completion(candidate)
+                taskGroup.leave()
                 
-                if !blockIsFound {
-                    print("Block found by thread #\(threadID)")
-                    blockIsFound = true
-                    completion(candidate)
-                    taskGroup.leave()
-                }
             }
         }
     }
