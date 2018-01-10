@@ -13,9 +13,10 @@ extension Droplet {
 		print("BlockChain count: \(state.blockChain.count)")
 		
 		if miningEnabled {
-			let miner = Miner(coinbase: "asdf", diff: 5000, threadCount: 4)
-			//Craft a new block to test mining with
+			//Initialize miner
+			let miner = Miner(coinbase: "coinbaseAddressNotImplementedYet", diffBits: 20, threadCount: 4)
 			
+			//Craft a new block to test mining with
 			let myGroup = DispatchGroup()
 			
 			while true {

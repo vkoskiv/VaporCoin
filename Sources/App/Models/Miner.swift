@@ -13,7 +13,7 @@ class Miner {
 	
 	//Address
 	var coinbase: String
-	var difficulty: Int64
+	var diffBits: String
 	
 	//Mining params
 	var nonce: Int32 = 0
@@ -22,10 +22,10 @@ class Miner {
 	//Hardware params
 	var threadCount: Int = 1
 	
-	init(coinbase: String, diff: Int64, threadCount: Int) {
-		print("Starting VaporCoin miner with \(threadCount) threads")
+	init(coinbase: String, diffBits: Int, threadCount: Int) {
+		print("Starting VaporCoin miner with \(threadCount) threads and a difficulty of \(diffBits) bits")
 		self.coinbase = coinbase
-		self.difficulty = diff
+		self.diffBits = String(repeatElement("0", count: diffBits))
 		self.threadCount = threadCount
 	}
 	
@@ -58,7 +58,7 @@ class Miner {
 			//difficulty = log2(difficulty) + 32
 			
 			//TODO: Find a more efficient way to check prefix zeroes.
-			while (!candidate.blockHash.binaryString.hasPrefix("0000000000000000000000")) {
+			while (!candidate.blockHash.binaryString.hasPrefix(self.diffBits)) {
 				candidate.nonce += 1
 				candidate.timestamp = Date().timeIntervalSince1970
 				candidate.blockHash = candidate.encoded.sha256

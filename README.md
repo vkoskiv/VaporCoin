@@ -66,5 +66,6 @@ Block header:
     vapor run
 
 ##  Difficulty Factor
-   To mine a block, you can drop down the difficulty by removing zeroes in Miner.swift:
-   while (!candidate.blockHash.binaryString.hasPrefix("000000000000000000000000000000")) 
+   To mine a block, you can lower the diffBis amount in Droplet+Setup.swift line 17:
+  
+	let miner = Miner(coinbase: "coinbaseAddressNotImplementedYet", diffBits: 20, threadCount: 4) 
