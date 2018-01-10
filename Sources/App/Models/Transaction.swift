@@ -121,13 +121,6 @@ class Transaction: NSObject, NSCoding {
 		return [Transaction()]
 	}
 	
-	func verifyTransaction() -> Bool {
-		//Check that output <= input
-		//Check timestamp
-		//Check addresses?
-		return false
-	}
-	
 	func encoded() -> Data {
 		return NSKeyedArchiver.archivedData(withRootObject: self)
 	}

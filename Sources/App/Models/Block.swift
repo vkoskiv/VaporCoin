@@ -9,7 +9,7 @@ import Crypto
 import Vapor
 import Foundation
 
-final class Block: NSObject, NSCoding {
+class Block: NSObject, NSCoding {
 	//Block header
 	var prevHash: Data
 	//FIXME: merkleRoot is computed every single time. Find a way to set+store it whenever transactions are altered.
@@ -57,41 +57,6 @@ final class Block: NSObject, NSCoding {
 	
 	var encoded: Data {
 		return prevHash + merkleRoot + Data(from: depth) + Data(from: timestamp) + Data(from: target) + Data(from: nonce)
-	}
-	
-	func verify() -> Bool {
-		//Verify the validity of a block
-		//Check that the reported hash matches
-		let testHash = self.encoded.sha256
-		if self.blockHash != testHash {
-			print("Block hash doesn't match")
-			return false
-		}
-		
-		//Check that hash is valid (Matches difficulty)
-		//FIXME: This is a bit of a hack
-		if let hashNum = UInt256(data: NSData(data: self.blockHash)) {
-			//HASH < 2^(256-minDifficulty) / currentDifficulty
-			if hashNum > (UInt256.max - UInt256(32)) / UInt256(state.currentDifficulty) {
-				//Block hash doesn't match current difficulty
-				return false
-			}
-		}
-		
-		//Check timestamp
-		let currentTime: Double = Double(Date().timeIntervalSince1970)
-		let maxTimeDeviation: Double = 1800 // 30 minutes
-		if self.timestamp < (currentTime - maxTimeDeviation) {
-			//Block timestamp more than 30min in past
-			return false
-		}
-		if self.timestamp > (currentTime + maxTimeDeviation) {
-			//Block timestamp more than 30min in future
-			return false
-		}
-		
-		//Looks good
-		return true
 	}
 	
 	//MARK: Swift encoding logic
