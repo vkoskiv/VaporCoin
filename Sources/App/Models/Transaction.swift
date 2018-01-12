@@ -8,26 +8,6 @@
 import Vapor
 import Foundation
 
-class TransactionInput {
-	var value: Int64
-	var txHash: Data
-	
-	init(value: Int64, hash: Data) {
-		self.value = value
-		self.txHash = hash
-	}
-}
-
-class TransactionOutput {
-	var value: Int64
-	var txHash: Data
-	
-	init(value: Int64, hash: Data) {
-		self.value = value
-		self.txHash = hash
-	}
-}
-
 public enum transactionType {
 	case coinbase //Special, miner reward
 	case normal   //Regular utxo value transaction
@@ -36,37 +16,43 @@ public enum transactionType {
 
 class Transaction: NSObject, NSCoding {
 	
-	// 100,000,000 = 1.0 VaporCoins
+	// 100,000,000 = 1.0 VaporCoins (8 decimal places)
 	
-	var inputs: [Transaction]
-	var outputs: [Transaction]
+	var value: Int64
 	
 	var from: Data
-	var senderPubKey: Data
-	var senderSignature: Data
-	
 	var recipient: Data
-	var txnHash: Data
+	
+	var txnType: transactionType
+	
+	var txnHash: Data //Hash of transaction
+	var senderSig: Data //txnHash signed with privKey
+	var senderPubKey: Data //The key that can "decrypt" senderSig
 	
 	override init() {
-		self.inputs = []
-		self.outputs = []
-		self.from = Data()
-		self.senderPubKey = Data()
-		self.senderSignature = Data()
+		self.value = 0
 		
+		self.from = Data()
 		self.recipient = Data()
+		
+		self.txnType = .normal
+		
 		self.txnHash = Data()
+		self.senderSig = Data()
+		self.senderPubKey = Data()
 	}
 	
-	init(inputs: [Transaction], outputs: [Transaction], from: Data, senderPubKey: Data, senderSignature: Data, recipient: Data, hash: Data) {
-		self.inputs = inputs
-		self.outputs = outputs
+	init(value: Int64, from: Data, recipient: Data, txnType: transactionType, txnHash: Data, senderSig: Data, senderPubKey: Data) {
+		self.value = value
+		
 		self.from = from
-		self.senderPubKey = senderPubKey
-		self.senderSignature = senderSignature
 		self.recipient = recipient
-		self.txnHash = hash
+		
+		self.txnType = txnType
+		
+		self.txnHash = txnHash
+		self.senderSig = senderSig
+		self.senderPubKey = senderPubKey
 	}
 	
 	func newTranscation(source: Wallet, dest: Wallet, input: Int64, output: Int64) -> Transaction {
@@ -121,6 +107,18 @@ class Transaction: NSObject, NSCoding {
 		return [Transaction()]
 	}
 	
+	func getTransactionWith(hash: Data) -> Transaction {
+		for block in state.blockChain {
+			for txn in block.txns {
+				if txn.txnHash == hash {
+					return txn
+				}
+			}
+		}
+		print("no txn found with \(hash)")
+		return Transaction()
+	}
+	
 	func encoded() -> Data {
 		return NSKeyedArchiver.archivedData(withRootObject: self)
 	}
@@ -128,24 +126,28 @@ class Transaction: NSObject, NSCoding {
 	//MARK: Swift encoding logic
 	
 	public convenience required init?(coder aDecoder: NSCoder) {
-		let inputs = aDecoder.decodeObject(forKey: "inputs") as! [Transaction]
-		let outputs = aDecoder.decodeObject(forKey: "outputs") as! [Transaction]
+		
+		let value = aDecoder.decodeInt64(forKey: "value")
+		
 		let from = aDecoder.decodeObject(forKey: "from") as! Data
-		let senderPubKey = aDecoder.decodeObject(forKey: "senderPubKey") as! Data
-		let senderSignature = aDecoder.decodeObject(forKey: "senderSignature") as! Data
-		
 		let recipient = aDecoder.decodeObject(forKey: "recipient") as! Data
-		let hash = aDecoder.decodeObject(forKey: "hash") as! Data
 		
-		self.init(inputs: inputs, outputs: outputs, from: from, senderPubKey: senderPubKey, senderSignature: senderSignature, recipient: recipient, hash: hash)
+		let txnType = aDecoder.decodeObject(forKey: "type") as! transactionType
+		
+		let txnHash = aDecoder.decodeObject(forKey: "txnhash") as! Data
+		let senderSig = aDecoder.decodeObject(forKey: "sendersig") as! Data
+		let senderPubKey = aDecoder.decodeObject(forKey: "senderpubkey") as! Data
+		
+		self.init(value: value, from: from, recipient: recipient, txnType: txnType, txnHash: txnHash, senderSig: senderSig, senderPubKey: senderPubKey)
 	}
 	
 	func encode(with aCoder: NSCoder) {
-		aCoder.encode(inputs, forKey: "inputs")
-		aCoder.encode(outputs, forKey: "outputs")
-		aCoder.encode(from, forKey: "from")
-		aCoder.encode(senderPubKey, forKey: "senderPubKey")
-		aCoder.encode(senderSignature, forKey: "senderSignature")
-		aCoder.encode(recipient, forKey: "recipient")
+		aCoder.encode(self.value, forKey: "value")
+		aCoder.encode(self.from, forKey: "from")
+		aCoder.encode(self.recipient, forKey: "recipient")
+		aCoder.encode(self.txnType, forKey: "type")
+		aCoder.encode(self.txnHash, forKey: "txnhash")
+		aCoder.encode(self.senderSig, forKey: "sendersig")
+		aCoder.encode(self.senderPubKey, forKey: "senderpubkey")
 	}
 }
