@@ -65,7 +65,14 @@ Block header:
     vapor build 
     vapor run
 
-##  Difficulty Factor
+## Difficulty Factor
    To mine a block, you can lower the diffBis amount in Droplet+Setup.swift line 17:
   
-	let miner = Miner(coinbase: "coinbaseAddressNotImplementedYet", diffBits: 20, threadCount: 4) 
+	let miner = Miner(coinbase: "coinbaseAddressNotImplementedYet", diffBits: 20, threadCount: 4)
+
+## Tips
+   Get me some coffee:
+
+	ETH: 0x1e8e9c1a1b71ff88829b962cfa7190d074343b37
+	LTC: LZc2QcyZGuhHF18s96VAUPpByZq2S8yCsj
+	ZEC: t1UukAm25iRLTyTQfhX6WfRBzMjp8UCmy4a
