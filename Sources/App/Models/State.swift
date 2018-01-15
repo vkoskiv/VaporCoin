@@ -59,6 +59,21 @@ class State: Hashable {
         }
     }
     
+    private var _threadedHashingQueue = OperationQueue()
+    var hashingQueue:OperationQueue{
+        get {
+            return blockChain.queue.sync {
+                _threadedHashingQueue
+            }
+        }
+        set {
+            blockChain.queue.sync {
+                _threadedHashingQueue = newValue
+            }
+            
+        }
+    }
+    
     private var _miningQueue = OperationQueue()
     var miningQueue:OperationQueue{
         get {
@@ -73,7 +88,6 @@ class State: Hashable {
             
         }
     }
-    
     
 
     
@@ -97,6 +111,7 @@ class State: Hashable {
         self.currentDifficulty = 1
         self.blocksSinceDifficultyUpdate = 1
 
+        self.miningQueue.maxConcurrentOperationCount = 1
         
         //self.initConnections()
         

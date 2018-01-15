@@ -4,13 +4,17 @@ import Foundation
 //Global client state
 let state = State()
 
-class HashingOperation: Operation {
+class ConcurrentOperation: Operation {
     override var isAsynchronous: Bool {
         return true
     }
-    
-    
  }
+
+class MiningOperation: Operation {
+    override var isAsynchronous: Bool {
+        return false
+    }
+}
 
 extension Droplet {
     

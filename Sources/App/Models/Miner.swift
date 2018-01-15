@@ -14,7 +14,7 @@ import Foundation
 // hashDifficulty low + high
 class Miner {
     
-    static var debug = false
+    static var debug = true
     
     //Address
     var coinbase: String
@@ -28,7 +28,7 @@ class Miner {
     static var threadCount: Int = 1
     
     // Reduce to make mining faster
-    static var hashDifficulty:String  = "0000000"
+    static var hashDifficulty:String  = "000000"
     
     init(coinbase: String, diff: Int64, threadCount: Int) {
         if Miner.debug{
@@ -40,7 +40,7 @@ class Miner {
     }
     
     
-    // This single entry point creates a VaporCoin Supervisor Thread - which is intended to  have ever have one thread.
+    // This single entry point creates a VaporCoin Supervisor Thread - which is intended to  one have one worker thread.
     // N.B. the count in SupervisorThread includes main thread so count is 2  (but main thread isn't accessible from within vapor droplet).
      @objc static func beginMiningOnSingleThread(){
         ThreadSupervisor.createAndRunThread(target: Miner.self, selector: #selector(Miner.mine), object: nil)
@@ -66,7 +66,7 @@ class Miner {
         
       
         // Here we're using the state.miningQueue so that we can sync up with the
-        let queue =  state.miningQueue
+        let queue =  state.hashingQueue
 
         queue.isSuspended = true
         queue.maxConcurrentOperationCount = Miner.threadCount
@@ -76,7 +76,7 @@ class Miner {
         }
         for psuedoThreadId in 0...Miner.threadCount-1{
             
-            let op = HashingOperation()
+            let op = ConcurrentOperation()
             
             op.completionBlock = {
                 let candidate = block.newCopy()
@@ -112,6 +112,8 @@ class Miner {
                 if !state.blockFound {
                     queue.isSuspended = true
                     queue.cancelAllOperations()
+                    state.miningQueue.cancelAllOperations()
+//                    print("state.miningQueue.count:",state.miningQueue.operationCount)
                     self.blockFound(candidate)
                 }
             }
@@ -137,19 +139,39 @@ class Miner {
             if block.depthTarget == state.blockChain.count{
                 if !state.blockFound{
                     state.blockFound = true
+                    
 //                    block.debug()
                     print("depth     : \(state.blockChain.count)") // TODO - logInfo - this should increase and not skip!!!
                     state.blocksSinceDifficultyUpdate += 1
                     state.blockChain.append(block)
-                    Miner.drainMiningQueueAndStartAgain()
-//                     ThreadSupervisor.createAndRunThread(target: Miner.self, selector: #selector(drainMiningQueueAndStartAgain), object: nil)
+//                    print("numberOfThreads:",ThreadSupervisor.numberOfThreads)
+                    
+                    state.miningQueue.cancelAllOperations()
+                     let op = MiningOperation()
+                    op.completionBlock = {
+                        if !op.isCancelled{
+                            Miner.mine()
+                        }
+                    }
+                    if state.miningQueue.operationCount == 0{
+                        state.miningQueue.addOperation(op)
+                    }else{
+                        print("potential dead lock....sleepng...:", state.miningQueue.operationCount )
+                        sleep(1)
+                        state.miningQueue.addOperation(op)
+                    }
+
                 }else{
-              //       print("blockFound on other thread")
+                    if Miner.debug{
+                       print("blockFound on other thread")
+                    }
                 }
             }
         }else{
             if Miner.debug{
-//                print("dropping.... ")
+                if Miner.debug{
+                    print("dropping.... ")
+                }
             }
         }
         
@@ -164,9 +186,7 @@ class Miner {
 //        let sleepCount:useconds_t = difficulty < 2000 ? 200000:difficulty*2000
         usleep(100000000 * difficultyHeight) // we need to give the some cycles to correctly cancel existing operations across threads - otherwise this thread can get caught up with cancelling - and basically miner runs out of things todo
         ThreadSupervisor.createAndRunThread(target: Miner.self, selector: #selector(mine), object: nil)
-//        print("numberOfThreads:",ThreadSupervisor.numberOfThreads)
-//        print("state.blockFound:",state.blockFound)
-//        Miner.mine()
+
 
     }
 }
