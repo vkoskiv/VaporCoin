@@ -68,9 +68,8 @@ class Miner {
         block.blockHash = block.encoded().sha256
         
       
-        // Here we're using the state.miningQueue so that we can sync up with the
+        // Here we're using the state.hashingQueue so that we cancel uniformly across threads if a single thread finds a block.
         let hashQueue =  state.hashingQueue
-
         hashQueue.isSuspended = true
         hashQueue.maxConcurrentOperationCount = Miner.threadCount
         
