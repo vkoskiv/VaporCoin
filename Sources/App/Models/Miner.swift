@@ -18,6 +18,9 @@ class Miner {
     
     static var debug = false
     
+    // TODO - find a way to optimise this
+    static var bandAidDelay:useconds_t = 200
+    
     //Address
     var coinbase: String
     var difficulty: Int64
@@ -30,7 +33,8 @@ class Miner {
     static var threadCount: Int = 1
     
     // Reduce to make mining faster
-    static var hashDifficulty:String  = "00000"
+    static var hashDifficulty:String  = "0" //- unstable - reduce bandAidDelay to speed up mining.
+//    static var hashDifficulty:String  = "000000000000000000"
     
     init(coinbase: String, diff: Int64, threadCount: Int) {
         if Miner.debug{
@@ -122,6 +126,7 @@ class Miner {
                     let newBlockOp = BlockFoundOperation()
                     newBlockOp.completionBlock = {
                         if !newBlockOp.isCancelled{
+                            
                             Miner.blockFound(candidate)
                         }
                     }
@@ -158,11 +163,11 @@ class Miner {
                     print("depth     : \(state.blockChain.count)") // TODO - logInfo - this should increase and not skip!!!
                     state.blocksSinceDifficultyUpdate += 1
                     state.blockChain.append(block)
-                    
                     state.blockFoundQueue.cancelAllOperations()
-                  
-                   
-                   Miner.queueUpMiningOperation()
+                    state.hashingQueue.cancelAllOperations()
+                    state.blockFound = false
+                    ThreadSupervisor.createAndRunThread(target: Miner.self, selector: #selector(Miner.queueUpMiningOperation), object: nil)
+
 
                 }else{
                     if Miner.debug{
@@ -178,36 +183,54 @@ class Miner {
             // recover from cancelled operations.
             if (state.miningQueue.operationCount == 0){
                 print("attempting to recover")
-                sleep(1)
-                if !state.blockFound{
-                    state.miningQueue.cancelAllOperations()
-                    Miner.queueUpMiningOperation()
-                }
+                state.miningQueue.cancelAllOperations()
+                 usleep(Miner.bandAidDelay)
+                ThreadSupervisor.createAndRunThread(target: Miner.self, selector: #selector(Miner.queueUpMiningOperation), object: nil)
+
             }
         }
     }
     
+    @objc static func cancelAllMiningOperations(){
+        state.miningQueue.cancelAllOperations()
+        state.blockFoundQueue.cancelAllOperations()
+        state.hashingQueue.cancelAllOperations()
+    }
+
+    
     // This queue allows  the canceling of  mining across threads.
     // without this - we can get thread explosion on lower difficulties.
     // basically - this is a serial queue - that should only ever have one miningOperation.
+    // at this point state.blockFound  should be false
     @objc static func queueUpMiningOperation(){
         
+        if ThreadSupervisor.numberOfThreads > 2{
+            if Miner.debug{
+                 print("bailing out too many threads")
+            }
+           return
+        }
+        
+        state.miningQueue.isSuspended = true
         let op = MiningOperation()
         op.completionBlock = {
             if !op.isCancelled{
-                Miner.mine()
+                if !state.blockFound{
+                    usleep(Miner.bandAidDelay)
+                     Miner.mine()
+                }
+               
             }
         }
         if state.miningQueue.operationCount == 0{
             state.miningQueue.addOperation(op)
         }else{
-            state.miningQueue.cancelAllOperations()
-            state.blockFoundQueue.cancelAllOperations()
-            state.hashingQueue.cancelAllOperations()
             print("potential dead lock....sleeping...:", state.miningQueue.operationCount )
-            sleep(1)
+            usleep(Miner.bandAidDelay)
             state.miningQueue.addOperation(op)
         }
+        
+         state.miningQueue.isSuspended = false
     }
 
 }
