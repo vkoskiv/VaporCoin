@@ -14,7 +14,7 @@ import Foundation
 // hashDifficulty low + high
 class Miner {
     
-    static var debug = true
+    static var debug = false
     
     //Address
     var coinbase: String
@@ -91,14 +91,14 @@ class Miner {
                     candidate.blockHash = candidate.encoded().sha256
                     if candidate.depthTarget != state.blockChain.count{
                         if Miner.debug {
-//                           print("depth target changed")
+                           print("depth target changed")
                         }
                         return
                     }
 
                     if op.isCancelled{
                         if Miner.debug {
-//                          print("cancelled")
+                          print("cancelled")
                         }
                         return
                     }
@@ -164,8 +164,8 @@ class Miner {
 //        let sleepCount:useconds_t = difficulty < 2000 ? 200000:difficulty*2000
         usleep(100000000 * difficultyHeight) // we need to give the some cycles to correctly cancel existing operations across threads - otherwise this thread can get caught up with cancelling - and basically miner runs out of things todo
 //        ThreadSupervisor.createAndRunThread(target: Miner.self, selector: #selector(mine), object: nil)
-        print("numberOfThreads:",ThreadSupervisor.numberOfThreads)
-        print("state.blockFound:",state.blockFound)
+//        print("numberOfThreads:",ThreadSupervisor.numberOfThreads)
+//        print("state.blockFound:",state.blockFound)
         
         Miner.mine()
 
