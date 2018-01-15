@@ -45,15 +45,16 @@ Block header:
 
 ## TODO
 
-- JSON WebSocket interface for peer-to-peer communication / untested
+- JSON WebSocket p2p communication / Incomplete
 - Peer discovery
-- JSON-RPC protocol
 - Locally hosted web interface to send and receive transactions, change settings and monitor blockchain status.
-- Miner program. Possibly separate process. / Implemented, difficulty adjustment needs to be implemented
+- Miner / Implemented, needs work
+- Fractional difficulty adjustment (Swift can't deal with 256bit uints)
 - Database logic
 - Proper node syncing
-- Signatures
-- Transactions
+- ECDSA Signatures, key management (Wallet.swift)
+- UTXO Transactions
+- Establish consensus
 
 ## Getting started
 
@@ -64,6 +65,14 @@ Block header:
     vapor build 
     vapor run
 
-##  Difficulty Factor
-   To mine a block, you can drop down the difficulty by removing zeroes in Miner.swift:
-   while (!candidate.blockHash.binaryString.hasPrefix("000000000000000000000000000000")) 
+## Difficulty Factor
+   To mine a block, you can lower the diffBis amount in Droplet+Setup.swift line 17:
+  
+	let miner = Miner(coinbase: "coinbaseAddressNotImplementedYet", diffBits: 20, threadCount: 4)
+
+## Tips
+   Get me some coffee:
+
+	ETH: 0x1e8e9c1a1b71ff88829b962cfa7190d074343b37
+	LTC: LZc2QcyZGuhHF18s96VAUPpByZq2S8yCsj
+	ZEC: t1UukAm25iRLTyTQfhX6WfRBzMjp8UCmy4a

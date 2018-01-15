@@ -89,6 +89,22 @@ class State: Hashable {
         }
     }
     
+    // In some difficulties - blocks were being found simulatenously across threads.
+    // this serial queue was designed to force execution into a serial queue & avoid a potential dead lock situation.
+    private var _blockFoundQueue = OperationQueue()
+    var blockFoundQueue:OperationQueue{
+        get {
+            return blockChain.queue.sync {
+                _blockFoundQueue
+            }
+        }
+        set {
+            blockChain.queue.sync {
+                _blockFoundQueue = newValue
+            }
+        }
+    }
+    
 
     
     init() {
@@ -111,7 +127,8 @@ class State: Hashable {
         self.currentDifficulty = 1
         self.blocksSinceDifficultyUpdate = 1
 
-        self.miningQueue.maxConcurrentOperationCount = 1
+        _miningQueue.maxConcurrentOperationCount = 1
+        _blockFoundQueue.maxConcurrentOperationCount = 1
         
         //self.initConnections()
         

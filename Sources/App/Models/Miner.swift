@@ -12,9 +12,11 @@ import Foundation
 // TODO - unit tests
 // thread count 4 -> 4000
 // hashDifficulty low + high
+// debug on / off  - this can effect speeds of mining / delays
+
 class Miner {
     
-    static var debug = true
+    static var debug = false
     
     //Address
     var coinbase: String
@@ -28,7 +30,7 @@ class Miner {
     static var threadCount: Int = 1
     
     // Reduce to make mining faster
-    static var hashDifficulty:String  = "000000"
+    static var hashDifficulty:String  = "00000"
     
     init(coinbase: String, diff: Int64, threadCount: Int) {
         if Miner.debug{
@@ -57,8 +59,9 @@ class Miner {
         }
 
         state.blockFound = false
+        state.blockFoundQueue.cancelAllOperations()
         
-        let miner = Miner(coinbase: "coinbaseAddressNotImplementedYet", diff: 20, threadCount: 4)
+        let miner = Miner(coinbase: "coinbaseAddressNotImplementedYet", diff: 20, threadCount: 40)
         let block = Block(prevHash: state.getPreviousBlock().blockHash, depth: state.blockChain.count, txns: [Transaction()], timestamp: Date().timeIntervalSince1970, difficulty: 5000, nonce: 0, hash: Data())
         
         block.nonce = 0
@@ -66,13 +69,13 @@ class Miner {
         
       
         // Here we're using the state.miningQueue so that we can sync up with the
-        let queue =  state.hashingQueue
+        let hashQueue =  state.hashingQueue
 
-        queue.isSuspended = true
-        queue.maxConcurrentOperationCount = Miner.threadCount
+        hashQueue.isSuspended = true
+        hashQueue.maxConcurrentOperationCount = Miner.threadCount
         
         if Miner.debug{
-            print("BEGIN - queue:",queue.operationCount)
+            print("BEGIN - queue:",hashQueue.operationCount)
         }
         for psuedoThreadId in 0...Miner.threadCount-1{
             
@@ -109,22 +112,34 @@ class Miner {
                 }
                 
                 
+                // New Candidate Block discovered - why the blockFoundQueue ?
+                // without - it's possible two threads can simulatenously enter the blockFound method.
                 if !state.blockFound {
-                    queue.isSuspended = true
-                    queue.cancelAllOperations()
+                    hashQueue.isSuspended = true
+                    hashQueue.cancelAllOperations()
                     state.miningQueue.cancelAllOperations()
-//                    print("state.miningQueue.count:",state.miningQueue.operationCount)
-                    self.blockFound(candidate)
+
+                    
+                    let newBlockOp = BlockFoundOperation()
+                    newBlockOp.completionBlock = {
+                        if !newBlockOp.isCancelled{
+                            Miner.blockFound(candidate)
+                        }
+                    }
+                    state.blockFoundQueue.cancelAllOperations()
+                    // this should be singular / serial queue
+                    state.blockFoundQueue.addOperation(newBlockOp)
+                    
                 }
             }
-            queue.addOperation(op)
+            hashQueue.addOperation(op)
         }
         
         if Miner.debug{
-            print("END - queue:",queue.operationCount)
+            print("END - queue:",hashQueue.operationCount)
         }
         
-        queue.isSuspended = false
+        hashQueue.isSuspended = false
     }
     
     // Thread Sanity Check - only add candidate block if another thread hasn't beat it to it
@@ -133,33 +148,22 @@ class Miner {
     @objc static func blockFound(_ block: Block) {
 
         let lastBlockHash = state.blockChain.last?.blockHash.binaryString
-        // is this thread lagging - did the blockchain advance on another thread?
+        // is this thread lagging - did the candidate blockchain advance on another thread?
         if  lastBlockHash == block.prevHash.binaryString{
             
             if block.depthTarget == state.blockChain.count{
                 if !state.blockFound{
                     state.blockFound = true
                     
-//                    block.debug()
+                    block.debug()
                     print("depth     : \(state.blockChain.count)") // TODO - logInfo - this should increase and not skip!!!
                     state.blocksSinceDifficultyUpdate += 1
                     state.blockChain.append(block)
-//                    print("numberOfThreads:",ThreadSupervisor.numberOfThreads)
                     
-                    state.miningQueue.cancelAllOperations()
-                     let op = MiningOperation()
-                    op.completionBlock = {
-                        if !op.isCancelled{
-                            Miner.mine()
-                        }
-                    }
-                    if state.miningQueue.operationCount == 0{
-                        state.miningQueue.addOperation(op)
-                    }else{
-                        print("potential dead lock....sleepng...:", state.miningQueue.operationCount )
-                        sleep(1)
-                        state.miningQueue.addOperation(op)
-                    }
+                    state.blockFoundQueue.cancelAllOperations()
+                  
+                   
+                   Miner.queueUpMiningOperation()
 
                 }else{
                     if Miner.debug{
@@ -169,24 +173,42 @@ class Miner {
             }
         }else{
             if Miner.debug{
-                if Miner.debug{
-                    print("dropping.... ")
+                print("dropping.... :",state.miningQueue.operationCount)
+            }
+           
+            // recover from cancelled operations.
+            if (state.miningQueue.operationCount == 0){
+                print("attempting to recover")
+                sleep(1)
+                if !state.blockFound{
+                    state.miningQueue.cancelAllOperations()
+                    Miner.queueUpMiningOperation()
                 }
             }
         }
-        
-
     }
     
-    // N.B. if the miner stops and there's no working thread - need to tweak the timing
-    // known issue - if the hashDifficulty is too big - this can stalled if we don't wait long enough for all operations to cancel.
-    @objc static func drainMiningQueueAndStartAgain(){
-        let difficultyHeight = useconds_t(Miner.hashDifficulty.count * threadCount*state.miningQueue.operationCount)
-        state.miningQueue.cancelAllOperations()
-//        let sleepCount:useconds_t = difficulty < 2000 ? 200000:difficulty*2000
-        usleep(100000000 * difficultyHeight) // we need to give the some cycles to correctly cancel existing operations across threads - otherwise this thread can get caught up with cancelling - and basically miner runs out of things todo
-        ThreadSupervisor.createAndRunThread(target: Miner.self, selector: #selector(mine), object: nil)
-
-
+    // This queue allows  the canceling of  mining across threads.
+    // without this - we can get thread explosion on lower difficulties.
+    // basically - this is a serial queue - that should only ever have one miningOperation.
+    @objc static func queueUpMiningOperation(){
+        
+        let op = MiningOperation()
+        op.completionBlock = {
+            if !op.isCancelled{
+                Miner.mine()
+            }
+        }
+        if state.miningQueue.operationCount == 0{
+            state.miningQueue.addOperation(op)
+        }else{
+            state.miningQueue.cancelAllOperations()
+            state.blockFoundQueue.cancelAllOperations()
+            state.hashingQueue.cancelAllOperations()
+            print("potential dead lock....sleeping...:", state.miningQueue.operationCount )
+            sleep(1)
+            state.miningQueue.addOperation(op)
+        }
     }
+
 }

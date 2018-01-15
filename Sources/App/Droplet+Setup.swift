@@ -15,6 +15,12 @@ class MiningOperation: Operation {
         return false
     }
 }
+class BlockFoundOperation: Operation {
+    override var isAsynchronous: Bool {
+        return false
+    }
+}
+
 
 extension Droplet {
     
