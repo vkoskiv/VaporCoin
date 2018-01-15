@@ -18,6 +18,7 @@ final class Block: NSObject, NSCoding {
     }
     var timestamp: Double //Unix Tstamp
     var target: Float
+    var depthTarget:Int
     var nonce: UInt64 //64 bit nonce
     
     var depth: Int
@@ -30,6 +31,7 @@ final class Block: NSObject, NSCoding {
     }
     
     override init() {
+        self.depthTarget = -1
         self.prevHash = Data()
         self.timestamp = Date().timeIntervalSince1970
         self.target = 1
@@ -42,6 +44,7 @@ final class Block: NSObject, NSCoding {
     }
     
     init(prevHash: Data, depth: Int, txns: [Transaction], timestamp: Double, difficulty: Float, nonce: UInt64, hash: Data) {
+        self.depthTarget = -1
         self.prevHash = prevHash
         self.depth = depth
         self.txns = txns
@@ -115,6 +118,21 @@ final class Block: NSObject, NSCoding {
         
         /*aCoder.encode(depth, forKey: "depth")
          aCoder.encode(txns, forKey: "txns")*/
+    }
+    
+    func debug(){
+        let date = Date(timeIntervalSince1970: self.timestamp)
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd-MM-YYYY hh:mm:ss"
+        let dateString = formatter.string(from: date)
+
+        print("prevHash  : \(self.prevHash.hexString)")
+        print("hash      : \(self.blockHash.hexString)")
+        print("nonce     : \(self.nonce)")
+
+        print("merkleRoot: \(self.merkleRoot.hexString)")
+        print("timestamp : \(self.timestamp) (\(dateString))")
+        print("targetDiff: \(self.target)\n")
     }
 }
 

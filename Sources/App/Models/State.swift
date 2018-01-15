@@ -44,6 +44,21 @@ class State: Hashable {
     var currentDifficulty: Int64
     var blocksSinceDifficultyUpdate: Int
     
+    
+    private var _blockFound = false
+    var blockFound:Bool{
+        get {
+            return blockChain.queue.sync {
+                _blockFound
+            }
+        }
+        set {
+            blockChain.queue.sync {
+                _blockFound = newValue
+            }
+        }
+    }
+    
     private var _miningQueue = OperationQueue()
     var miningQueue:OperationQueue{
         get {
@@ -60,23 +75,7 @@ class State: Hashable {
     }
     
     
-    
 
-    private var _blockFound:Bool = false
-    var blockFound:Bool{
-        get {
-            return blockChain.queue.sync {
-                _blockFound
-            }
-        }
-        set {
-            blockChain.queue.sync {
-                _blockFound = newValue
-            }
-            
-        }
-    }
-    
     
     init() {
         print("Initializing client state")
