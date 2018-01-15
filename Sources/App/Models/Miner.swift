@@ -154,7 +154,7 @@ class Miner {
                 if !state.blockFound{
                     state.blockFound = true
                     
-                    block.debug()
+//                    block.debug()
                     print("depth     : \(state.blockChain.count)") // TODO - logInfo - this should increase and not skip!!!
                     state.blocksSinceDifficultyUpdate += 1
                     state.blockChain.append(block)
