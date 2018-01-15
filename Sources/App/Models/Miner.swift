@@ -163,11 +163,10 @@ class Miner {
         state.miningQueue.cancelAllOperations()
 //        let sleepCount:useconds_t = difficulty < 2000 ? 200000:difficulty*2000
         usleep(100000000 * difficultyHeight) // we need to give the some cycles to correctly cancel existing operations across threads - otherwise this thread can get caught up with cancelling - and basically miner runs out of things todo
-//        ThreadSupervisor.createAndRunThread(target: Miner.self, selector: #selector(mine), object: nil)
+        ThreadSupervisor.createAndRunThread(target: Miner.self, selector: #selector(mine), object: nil)
 //        print("numberOfThreads:",ThreadSupervisor.numberOfThreads)
 //        print("state.blockFound:",state.blockFound)
-        
-        Miner.mine()
+//        Miner.mine()
 
     }
 }
