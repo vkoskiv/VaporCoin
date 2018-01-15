@@ -3,7 +3,7 @@
 //  App
 //
 //  Created by Valtteri Koskivuori on 04/01/2018.
-// 
+//
 
 import Foundation
 
@@ -31,69 +31,111 @@ class Miner {
         self.threadCount = threadCount
     }
     
-    func mineBlock(block: Block, completion: @escaping (Block) -> Void) {
-        block.nonce = 0
-        block.blockHash = block.encoded().sha256
-        findHash(block: block) { newBlock in
-            completion(newBlock)
-        }
+    
+    // This single entry point creates a VaporCoin Supervisor Thread - which is intended to  have ever have one thread.
+    // N.B. the count in SupervisorThread includes main thread so count is 2 out (but main thread isn't accessible from within vapor droplet).
+     @objc static func beginMiningOnSingleThread(){
+        ThreadSupervisor.createAndRunThread(target: Miner.self, selector: #selector(Miner.mine), object: nil)
     }
     
-    //TODO: add stuff to update the merkleRoot and timestamp periodically
-    //TODO: Implement proper difficulty. Perhaps HashCash approach for now, fractional later.
-    func findHash(block: Block, completion: @escaping (Block) -> Void) {
+    // From here we are creating a ConcurrentOperation and queuing up to a single OperationQueue with concurrency threading /multi-threads .
+    // We are using  OperationQueues instead DispatchQueues to organize / centralize cancelling of operations across threads.
+    // TODO - investigate   let queue =  OperationQueue.main to work here.
+    @objc static func mine(){
         
-        
-        let concurrentQueue = DispatchQueue(label: "hashQueue", attributes: .concurrent)
-        let taskGroup = DispatchGroup()
-        
-        concurrentQueue.async {
-            
-            DispatchQueue.concurrentPerform(iterations: self.threadCount) { threadID in
-                taskGroup.enter()
+        print("Current thread \(Thread.current)")
+        print("numberOfThreads:",ThreadSupervisor.numberOfThreads)
+     
 
+        let miner = Miner(coinbase: "asdf", diff: 5000, threadCount: 4)
+        let block = Block(prevHash: state.getPreviousBlock().blockHash, depth: state.blockChain.count, txns: [Transaction()], timestamp: Date().timeIntervalSince1970, difficulty: 5000, nonce: 0, hash: Data())
+        
+        block.nonce = 0
+        block.blockHash = block.encoded().sha256
+        
+      
+        // Here we're using the state.miningQueue so that we can sync up with the
+        let queue =  state.miningQueue
+        queue.isSuspended = true
+        queue.maxConcurrentOperationCount = miner.threadCount
+        
+        print("BEGIN - queue:",queue.operationCount)
+        for psuedoThreadId in 0...miner.threadCount-1{
+            
+            let op = HashingOperation()
+            
+            op.completionBlock = {
                 let candidate = block.newCopy()
                 
                 //Start each thread with a nonce at different spot
-                candidate.nonce = UInt64(threadID) * (UINT64_MAX/UInt64(self.threadCount))
-                
-                //TODO: Find a more efficient way to check prefix zeroes.
-                while (!candidate.blockHash.binaryString.hasPrefix("00")) {
+                candidate.nonce =  UInt64(psuedoThreadId) * (UINT64_MAX/UInt64(miner.threadCount))
+      
+                func mineCandidateHash () {
                     candidate.nonce += 1
                     candidate.timestamp = Date().timeIntervalSince1970
                     candidate.blockHash = candidate.encoded().sha256
+                    if op.isCancelled {
+                        return
+                    }
+                    // We got one.
+                    if candidate.blockHash.binaryString.hasPrefix("00"){
+                        return
+                    }
+                    mineCandidateHash()
                 }
 
-                print("Block found by thread #\(threadID)")
-                completion(candidate)
-                taskGroup.leave()
-                
+                mineCandidateHash()
+
+                if op.isCancelled {
+                    return
+                }else{
+                    queue.isSuspended = true
+                    queue.cancelAllOperations()
+                     ThreadSupervisor.createAndRunThread(target: Miner.self, selector: #selector(Miner.blockFound), object: candidate)
+
+                }
             }
+            queue.addOperation(op)
         }
+        
+        print("END - queue:",queue.operationCount)
+        queue.isSuspended = false
     }
     
-    func blockFound(block: Block) {
+    @objc static func blockFound(_ block: Block) {
         //Get user-readable date
-        let date = Date(timeIntervalSince1970: block.timestamp)
-        let formatter = DateFormatter()
-        formatter.dateFormat = "dd-MM-YYYY hh:mm:ss"
-        let dateString = formatter.string(from: date)
+
+        // Thread Sanity Check - only add candidate block if another thread hasn't beat it to it
+        // ie. this blockFound method can be called simulatenously in runloop
+        if state.blockChain.last?.blockHash.binaryString == block.prevHash.binaryString{
+            let date = Date(timeIntervalSince1970: block.timestamp)
+            let formatter = DateFormatter()
+            formatter.dateFormat = "dd-MM-YYYY hh:mm:ss"
+            //        let dateString = formatter.string(from: date)
+            
+            //        print("prevHash  : \(block.prevHash.hexString)")
+            //        print("hash      : \(block.blockHash.hexString)")
+            //        print("nonce     : \(block.nonce)")
+            
+            //        print("merkleRoot: \(block.merkleRoot.hexString)")
+            //        print("timestamp : \(block.timestamp) (\(dateString))")
+            //        print("targetDiff: \(block.target)\n")
+            print("depth     : \(state.blockChain.count)")
+            state.blocksSinceDifficultyUpdate += 1
+            state.blockChain.append(block)
+            self.drainMiningQueueAndStartAgain()
+        }else{
+                print("dropping.... ")
+        }
         
-        print("prevHash  : \(block.prevHash.hexString)")
-        print("hash      : \(block.blockHash.hexString)")
-        print("nonce     : \(block.nonce)")
-        print("depth     : \(block.depth)")
-        print("merkleRoot: \(block.merkleRoot.hexString)")
-        print("timestamp : \(block.timestamp) (\(dateString))")
-        print("targetDiff: \(block.target)\n")
-        print("blockDepth: \(block.depth)\n")
-        
-        //Update state
-        state.blockDepth += 1
-        state.blocksSinceDifficultyUpdate += 1
-        //And just add block for now
-        //TODO: Broadcast block, do checks, and a ton of other stuffs
-        state.blockChain.append(block)
+
     }
     
+    @objc static func drainMiningQueueAndStartAgain(){
+        
+        state.miningQueue.cancelAllOperations()
+        usleep(20000) // we need to give the mineCandidateHash some cycles to correctly cancel existing operations across threads - otherwise this thread can get caught up with cancelling - and basically miner runs out of things todo.
+        print(">>> queue:",state.miningQueue.operationCount)
+        ThreadSupervisor.createAndRunThread(target: self, selector: #selector(mine), object: nil)
+    }
 }

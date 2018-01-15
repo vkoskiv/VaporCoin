@@ -44,16 +44,34 @@ class State: Hashable {
     var currentDifficulty: Int64
     var blocksSinceDifficultyUpdate: Int
     
-    private var _blockDepth:Int = 0
-    var blockDepth:Int{
+    private var _miningQueue = OperationQueue()
+    var miningQueue:OperationQueue{
         get {
             return blockChain.queue.sync {
-                _blockDepth
+                _miningQueue
             }
         }
         set {
             blockChain.queue.sync {
-                _blockDepth = newValue
+                _miningQueue = newValue
+            }
+            
+        }
+    }
+    
+    
+    
+
+    private var _blockFound:Bool = false
+    var blockFound:Bool{
+        get {
+            return blockChain.queue.sync {
+                _blockFound
+            }
+        }
+        set {
+            blockChain.queue.sync {
+                _blockFound = newValue
             }
             
         }
@@ -79,7 +97,7 @@ class State: Hashable {
         //Blockchain state params
         self.currentDifficulty = 1
         self.blocksSinceDifficultyUpdate = 1
-        self.blockDepth = 1
+
         
         //self.initConnections()
         
@@ -107,9 +125,12 @@ class State: Hashable {
          }*/
     }
     
+    func cancelAllMiningOperations(){
+        miningQueue.cancelAllOperations()
+    }
     func startSync() {
         //Query other nodes for blockchain status, and then sync until latest block
-        print("Starting background sync, from block \(state.blockDepth)")
+        print("Starting background sync, from block \(state.blockChain.count)")
         self.p2pProtocol.sendRequest(request: .getBlock, to: nil, 0)
     }
     
@@ -171,14 +192,15 @@ class State: Hashable {
     }
     
     func getPreviousBlock() -> Block {
-        if self.blockChain.count > self.blockDepth - 1{
-            return self.blockChain[self.blockDepth - 1]
-        }else{
-            print("WARNING - self.blockDepth -1 < self.blockChain.count ")
-            print("self.blockChain.count:",self.blockChain.count)
-            //            print("self.blockDepth:",self.blockDepth)
-            return Block()
-        }
+        return self.blockChain.last!
+//        if self.blockChain.count > self.blockChain.count - 1{
+//
+//        }else{
+//            print("WARNING - self.blockDepth -1 < self.blockChain.count ")
+//            print("self.blockChain.count:",self.blockChain.count)
+//           print("self.blockDepth:",self.blockDepth)
+//            return Block()
+//        }
         
     }
     

@@ -54,3 +54,16 @@ Block header:
 - Proper node syncing
 - Signatures
 - Transactions
+
+## Getting started
+
+    brew install vapor/tap/vapor
+    
+    In project root directory:
+    vapor update
+    vapor build 
+    vapor run
+
+##  Difficulty Factor
+   To mine a block, you can drop down the difficulty by removing zeroes in Miner.swift:
+   while (!candidate.blockHash.binaryString.hasPrefix("000000000000000000000000000000")) 

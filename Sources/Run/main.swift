@@ -16,6 +16,13 @@ import App
 ///
 /// .run() runs the Droplet's commands, 
 /// if no command is given, it will default to "serve"
+
+//For now init state by reading value from there.
+//print("BlockChain count: \(state.blockChain.count)")
+
+
+
+
 let config = try Config()
 try config.setup()
 

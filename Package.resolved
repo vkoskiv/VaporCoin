@@ -78,8 +78,8 @@
         "repositoryURL": "https://github.com/vapor/fluent.git",
         "state": {
           "branch": null,
-          "revision": "6c730921636f660cdaafe1b83b7e6ab86bc3c55f",
-          "version": "2.5.0"
+          "revision": "84b0d96a61b66168f2a61ec788581e0a2ab6f9c3",
+          "version": "2.5.1"
         }
       },
       {
@@ -150,8 +150,8 @@
         "repositoryURL": "https://github.com/vapor/sockets.git",
         "state": {
           "branch": null,
-          "revision": "70d14c0e223257176f5ef69a595f7cad5de7a88b",
-          "version": "2.2.1"
+          "revision": "a77816695630a44d5d1393fc71eac37ac3d082ca",
+          "version": "2.2.2"
         }
       },
       {
