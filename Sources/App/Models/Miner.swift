@@ -65,7 +65,7 @@ class Miner {
         state.blockFound = false
         state.blockFoundQueue.cancelAllOperations()
         
-        let miner = Miner(coinbase: "coinbaseAddressNotImplementedYet", diff: 20, threadCount: 4)
+        let miner = Miner(coinbase: "coinbaseAddressNotImplementedYet", diff: 20, threadCount: 400)
         let block = Block(prevHash: state.getPreviousBlock().blockHash, depth: state.blockChain.count, txns: [Transaction()], timestamp: Date().timeIntervalSince1970, difficulty: 5000, nonce: 0, hash: Data())
         
         block.nonce = 0
@@ -182,7 +182,10 @@ class Miner {
            
             // recover from cancelled operations.
             if (state.miningQueue.operationCount == 0){
-                print("attempting to recover")
+                if Miner.debug{
+                    print("attempting to recover")
+                }
+                
                 state.miningQueue.cancelAllOperations()
                  usleep(Miner.bandAidDelay)
                 ThreadSupervisor.createAndRunThread(target: Miner.self, selector: #selector(Miner.queueUpMiningOperation), object: nil)
