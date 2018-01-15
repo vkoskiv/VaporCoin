@@ -61,7 +61,7 @@ class Miner {
         state.blockFound = false
         state.blockFoundQueue.cancelAllOperations()
         
-        let miner = Miner(coinbase: "coinbaseAddressNotImplementedYet", diff: 20, threadCount: 40)
+        let miner = Miner(coinbase: "coinbaseAddressNotImplementedYet", diff: 20, threadCount: 4)
         let block = Block(prevHash: state.getPreviousBlock().blockHash, depth: state.blockChain.count, txns: [Transaction()], timestamp: Date().timeIntervalSince1970, difficulty: 5000, nonce: 0, hash: Data())
         
         block.nonce = 0
