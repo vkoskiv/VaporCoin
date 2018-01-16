@@ -17,6 +17,16 @@ let coinbaseMaturity: Int = 50
 In this file, funcs for verifying everything.
 */
 
+//Consensus protocol
+extension Transaction {
+	func currentBlockReward() -> Int64 {
+		//TODO: Calculate block reward and return
+		//Return 50 full coins for now
+		return 5000000000
+	}
+}
+
+//Transaction verification
 extension Transaction {
 	func verifyTransaction() -> Bool {
 		//Check that output <= input
@@ -26,6 +36,7 @@ extension Transaction {
 	}
 }
 
+//Block verification
 extension Block {
 	func verify() -> Bool {
 		//Verify the validity of a block

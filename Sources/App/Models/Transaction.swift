@@ -14,6 +14,9 @@ public enum transactionType {
 	case data     //Arbitrary data?
 }
 
+//TODO: Possibly put value, from, recipient into a payload struct and support other types of txn
+//hash, sig and pubkey should exist in all transactions anyway
+
 class Transaction: NSObject, NSCoding {
 	
 	// 100,000,000 = 1.0 VaporCoins (8 decimal places)
@@ -53,6 +56,12 @@ class Transaction: NSObject, NSCoding {
 		self.txnHash = txnHash
 		self.senderSig = senderSig
 		self.senderPubKey = senderPubKey
+	}
+	
+	func newCoinbase(address: Wallet) -> Transaction {
+		//Get current block reward from Consensus protocol
+		let br = currentBlockReward()
+		let txn = Transaction(value: br, from: Data(), recipient: address.pubKey, txnType: .coinbase, txnHash: <#T##Data#>, senderSig: <#T##Data#>, senderPubKey: <#T##Data#>)
 	}
 	
 	func newTranscation(source: Wallet, dest: Wallet, input: Int64, output: Int64) -> Transaction {
