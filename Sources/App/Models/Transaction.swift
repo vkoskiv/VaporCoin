@@ -60,8 +60,9 @@ class Transaction: NSObject, NSCoding {
 	
 	func newCoinbase(address: Wallet) -> Transaction {
 		//Get current block reward from Consensus protocol
-		let br = currentBlockReward()
-		let txn = Transaction(value: br, from: Data(), recipient: address.pubKey, txnType: .coinbase, txnHash: <#T##Data#>, senderSig: <#T##Data#>, senderPubKey: <#T##Data#>)
+		//let br = currentBlockReward()
+		//let txn = Transaction(value: br, from: Data(), recipient: address.pubKey, txnType: .coinbase, txnHash: <#T##Data#>, senderSig: <#T##Data#>, senderPubKey: <#T##Data#>)
+		return Transaction()
 	}
 	
 	func newTranscation(source: Wallet, dest: Wallet, input: Int64, output: Int64) -> Transaction {
