@@ -178,7 +178,7 @@ class P2PProtocol {
 	func receivedBlock(block: Block) -> JSON {
 		//Check validity, and then remove txns from mempool
 		if block.verify() {
-			print("Block \(block.depth) valid!")
+			print("Block \(block.blockHash) (\(block.depth)) valid!")
 			//Remove block transactions from mempool, as they've been processed already.
 			for tx in block.txns {
 				state.memPool = state.memPool.filter { $0 != tx}
@@ -194,6 +194,8 @@ class P2PProtocol {
 			if state.blocksSinceDifficultyUpdate >= 60 {
 				state.updateDifficulty()
 			}
+			
+			//TODO: Restart mining here with new txns
 			
 			//And broadcast this block to other clients
 			broadcastBlock(block: block)

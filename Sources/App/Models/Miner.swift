@@ -29,6 +29,10 @@ class Miner {
 		self.threadCount = threadCount
 	}
 	
+	func restart() {
+		//TODO: Restart miner, with new block. Triggered when updating merkleroot + block received from another node
+	}
+	
 	func mineBlock(block: Block, completion: @escaping (Block) -> Void) {
 		block.nonce = 0
 		block.blockHash = block.encoded.sha256
