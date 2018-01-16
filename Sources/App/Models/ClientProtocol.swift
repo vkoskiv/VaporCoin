@@ -190,7 +190,7 @@ class P2PProtocol {
 			state.blockChain.append(block)
 			
 			state.blocksSinceDifficultyUpdate += 1
-			state.blockDepth += 1
+			
 			if state.blocksSinceDifficultyUpdate >= 60 {
 				state.updateDifficulty()
 			}
