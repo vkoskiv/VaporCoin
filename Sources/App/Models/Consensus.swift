@@ -20,9 +20,18 @@ In this file, funcs for verifying everything.
 //Consensus protocol
 extension Transaction {
 	func currentBlockReward() -> Int64 {
-		//TODO: Calculate block reward and return
-		//Return 50 full coins for now
-		return 5000000000
+		var fullAmount: Int64 = 5000000000
+		
+		//Figure out current block reward
+		//Block reward is halved every 2 102 400 blocks
+		
+		let divCount: Int = state.blockDepth / 2102400
+		
+		for _ in 0..<divCount {
+			fullAmount /= 2
+		}
+		
+		return fullAmount
 	}
 }
 
