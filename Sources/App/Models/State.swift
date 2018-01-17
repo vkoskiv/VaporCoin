@@ -27,7 +27,8 @@ class State: Hashable {
 	var clientVersion = 1
 	var clientType    = "hype-fullnode"
 	
-	var signature: Wallet? = nil
+	//This is the wallet of this client. Only one for now.
+	var clientWallet: Wallet? = nil
 
 	var p2pProtocol: P2PProtocol
 	var minerProtocol: MinerProtocol

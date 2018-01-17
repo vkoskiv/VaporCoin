@@ -28,9 +28,13 @@ class Transaction: NSObject, NSCoding {
 	
 	var txnType: transactionType
 	
-	var txnHash: Data //Hash of transaction
-	var senderSig: Data //txnHash signed with privKey
-	var senderPubKey: Data //The key that can "decrypt" senderSig
+	var txnHash: Data { //Hash of transaction
+		return self.encoded().sha256
+	}
+	
+	//These are both optional - Coinbase transactions don't need em
+	var senderSig: Data? //txnHash signed with privKey
+	var senderPubKey: Data? //The key that can "decrypt" senderSig
 	
 	override init() {
 		self.value = 0
@@ -40,12 +44,11 @@ class Transaction: NSObject, NSCoding {
 		
 		self.txnType = .normal
 		
-		self.txnHash = Data()
 		self.senderSig = Data()
 		self.senderPubKey = Data()
 	}
 	
-	init(value: Int64, from: Data, recipient: Data, txnType: transactionType, txnHash: Data, senderSig: Data, senderPubKey: Data) {
+	init(value: Int64, from: Data, recipient: Data, txnType: transactionType, senderSig: Data?, senderPubKey: Data?) {
 		self.value = value
 		
 		self.from = from
@@ -53,16 +56,26 @@ class Transaction: NSObject, NSCoding {
 		
 		self.txnType = txnType
 		
-		self.txnHash = txnHash
 		self.senderSig = senderSig
 		self.senderPubKey = senderPubKey
 	}
 	
 	func newCoinbase(address: Wallet) -> Transaction {
 		//Get current block reward from Consensus protocol
-		//let br = currentBlockReward()
-		//let txn = Transaction(value: br, from: Data(), recipient: address.pubKey, txnType: .coinbase, txnHash: <#T##Data#>, senderSig: <#T##Data#>, senderPubKey: <#T##Data#>)
-		return Transaction()
+		let br = currentBlockReward()
+		
+		guard let address = address.pubKey else {
+			print("No address for coinbase!")
+			return Transaction()
+		}
+		
+		let txn = Transaction(value: br,
+		                      from: Data(),
+		                      recipient: address,
+		                      txnType: .coinbase,
+		                      senderSig: nil,
+		                      senderPubKey: nil)
+		return txn
 	}
 	
 	func newTranscation(source: Wallet, dest: Wallet, input: Int64, output: Int64) -> Transaction {
@@ -144,11 +157,10 @@ class Transaction: NSObject, NSCoding {
 		
 		let txnType = aDecoder.decodeObject(forKey: "type") as! transactionType
 		
-		let txnHash = aDecoder.decodeObject(forKey: "txnhash") as! Data
 		let senderSig = aDecoder.decodeObject(forKey: "sendersig") as! Data
 		let senderPubKey = aDecoder.decodeObject(forKey: "senderpubkey") as! Data
 		
-		self.init(value: value, from: from, recipient: recipient, txnType: txnType, txnHash: txnHash, senderSig: senderSig, senderPubKey: senderPubKey)
+		self.init(value: value, from: from, recipient: recipient, txnType: txnType, senderSig: senderSig, senderPubKey: senderPubKey)
 	}
 	
 	func encode(with aCoder: NSCoder) {
@@ -156,7 +168,6 @@ class Transaction: NSObject, NSCoding {
 		aCoder.encode(self.from, forKey: "from")
 		aCoder.encode(self.recipient, forKey: "recipient")
 		aCoder.encode(self.txnType, forKey: "type")
-		aCoder.encode(self.txnHash, forKey: "txnhash")
 		aCoder.encode(self.senderSig, forKey: "sendersig")
 		aCoder.encode(self.senderPubKey, forKey: "senderpubkey")
 	}
