@@ -23,6 +23,7 @@ class Block: NSObject, NSCoding {
 	var depth: Int
 	var txns: [Transaction]
 	
+	//TODO: Should this be a computed value?
 	var blockHash: Data
 	
 	func newCopy() -> Block {
