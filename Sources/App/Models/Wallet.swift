@@ -11,15 +11,15 @@ import Foundation
 
 class Wallet {
 	
-	var pubKey: Data? = nil
-	var privKey: Data? = nil
+	var pubKey: AsymmetricKey? = nil
+	var privKey: AsymmetricKey? = nil
 	
 	//TODO: Make this a calculated value, ripemd160 of pubkey?
-	var address: Data {
+	var address: Data? {
 		return Data()
 	}
 	
-	init(pub: Data, priv: Data) {
+	init(pub: AsymmetricKey, priv: AsymmetricKey) {
 		self.pubKey = pub
 		self.privKey = priv
 	}
@@ -27,6 +27,24 @@ class Wallet {
 	init() {
 		self.pubKey = nil
 		self.privKey = nil
+	}
+	
+	init(withKeyPath: String) {
+		//Try and load up the keypair into memory
+		print("Loading keypair")
+		print("Looking for keys in \(withKeyPath)")
+		
+		do {
+			self.privKey = try AsymmetricKey.makePrivateKey(readingPEMAtPath: withKeyPath + "private.pem", passphrase: nil)
+		} catch {
+			print("Private key not found at \(withKeyPath)!")
+		}
+		
+		do {
+			self.pubKey = try AsymmetricKey.makePublicKey(readingPEMAtPath: withKeyPath + "public.pem")
+		} catch {
+			print("Public key not found at \(withKeyPath)!")
+		}
 	}
 	
 	func signTransaction(txn: Transaction, priv: Wallet) -> Data {

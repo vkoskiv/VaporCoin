@@ -8,7 +8,9 @@
 import Foundation
 import Vapor
 
-public final class JSONRPCParser {
+//NOT USED FOR NOW
+
+/*public final class JSONRPCParser {
 	var buffer: Bytes
 	
 	public init() {
@@ -28,4 +30,4 @@ public final class JSONRPCParser {
 		
 		return response
 	}
-}
+}*/

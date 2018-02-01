@@ -12,7 +12,9 @@ import Dispatch
 import Sockets
 import TLS //May not be needed
 
-public typealias CustomServerErrorHandler = (CustomServerError) -> ()
+//NOT USED FOR NOW
+
+/*public typealias CustomServerErrorHandler = (CustomServerError) -> ()
 
 public enum CustomServerError: Swift.Error {
 	case bind(host: String, port: Int, Swift.Error)
@@ -154,4 +156,4 @@ extension JSONServer where StreamType == TCPInternetSocket {
 		let tcp = try StreamType(scheme: scheme, hostname: hostname, port: port)
 		try self.init(tcp, listenMax: listenMax)
 	}
-}
+}*/

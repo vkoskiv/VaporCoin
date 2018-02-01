@@ -64,6 +64,8 @@ class State: Hashable {
 		self.blocksSinceDifficultyUpdate = 1
 		self.blockDepth = 1
 		
+		self.clientWallet = Wallet(withKeyPath: "/Users/vkoskiv/coinkeys/")
+		
 		//self.initConnections()
 		
 		//Set up initial client conns

@@ -13,9 +13,10 @@ extension Data {
 	//Properly working implementations courtesy of Zsolt Váradi
 	
 	//Return a hex string representation of a Data object
-	var hexString: String {
+	//SUPPLIED BY ServerCrypto
+	/*var hexString: String {
 		return map { String($0, radix: 16).leftPadding(toLength: 2, withPad: "0") }.joined()
-	}
+	}*/
 	
 	//Return a binary string representation of a Data object
 	var binaryString: String {

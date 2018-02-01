@@ -5,6 +5,8 @@
 //  Created by Valtteri Koskivuori on 18/09/2017.
 //
 
+//NOT USED FOR NOW
+
 import libc
 import Vapor
 import Transport
@@ -12,7 +14,7 @@ import Dispatch
 import Sockets
 import TLS //May not be needed
 
-public enum JSONClientError: Swift.Error {
+/*public enum JSONClientError: Swift.Error {
 	case invalidRequestHost
 	case invalidRequestPort
 	case unableToConnect
@@ -78,4 +80,4 @@ public final class JSONClient<StreamType: ClientStream>: CustomClient {
 		}
 		return jsonResponse!
 	}
-}
+}*/

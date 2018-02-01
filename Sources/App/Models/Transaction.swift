@@ -34,7 +34,12 @@ class Transaction: NSObject, NSCoding {
 	
 	//These are both optional - Coinbase transactions don't need em
 	var senderSig: Data? //txnHash signed with privKey
-	var senderPubKey: Data? //The key that can "decrypt" senderSig
+	var senderPubKey: AsymmetricKey? //The key that can "decrypt" senderSig
+	
+	//TODO - Ripemd160 of pubkey
+	var senderAddress: Data? {
+		return Data()
+	}
 	
 	override init() {
 		self.value = 0
@@ -44,11 +49,12 @@ class Transaction: NSObject, NSCoding {
 		
 		self.txnType = .normal
 		
-		self.senderSig = Data()
-		self.senderPubKey = Data()
+		self.senderSig = nil
+		//TODO: This makes bad things happen
+		self.senderPubKey = nil
 	}
 	
-	init(value: Int64, from: Data, recipient: Data, txnType: transactionType, senderSig: Data?, senderPubKey: Data?) {
+	init(value: Int64, from: Data, recipient: Data, txnType: transactionType, senderSig: Data?, senderPubKey: AsymmetricKey?) {
 		self.value = value
 		
 		self.from = from
@@ -64,7 +70,7 @@ class Transaction: NSObject, NSCoding {
 		//Get current block reward from Consensus protocol
 		let br = currentBlockReward()
 		
-		guard let address = address.pubKey else {
+		guard let address = address.address else {
 			print("No address for coinbase!")
 			return Transaction()
 		}
@@ -113,7 +119,7 @@ class Transaction: NSObject, NSCoding {
 		//Get all spent transactions
 		for block in state.blockChain {
 			for txn in block.txns {
-				if txn.senderPubKey == forOwner.pubKey {
+				if txn.senderAddress == forOwner.address {
 					
 				}
 			}
@@ -158,7 +164,7 @@ class Transaction: NSObject, NSCoding {
 		let txnType = aDecoder.decodeObject(forKey: "type") as! transactionType
 		
 		let senderSig = aDecoder.decodeObject(forKey: "sendersig") as! Data
-		let senderPubKey = aDecoder.decodeObject(forKey: "senderpubkey") as! Data
+		let senderPubKey = aDecoder.decodeObject(forKey: "senderpubkey") as! AsymmetricKey
 		
 		self.init(value: value, from: from, recipient: recipient, txnType: txnType, senderSig: senderSig, senderPubKey: senderPubKey)
 	}

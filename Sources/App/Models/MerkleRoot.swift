@@ -45,6 +45,10 @@ extension MerkleRoot {
 	static func buildTree(fromTransactions txns: [Transaction]) -> MerkleRoot {
 		var nodeArray = [MerkleRoot]()
 		
+		if txns.count == 0 {
+			return MerkleRoot.Empty
+		}
+		
 		for tx in txns {
 			nodeArray.append(MerkleRoot(hash: tx.txnHash))
 		}
