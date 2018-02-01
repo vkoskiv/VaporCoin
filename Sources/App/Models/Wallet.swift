@@ -37,13 +37,13 @@ class Wallet {
 		do {
 			self.privKey = try AsymmetricKey.makePrivateKey(readingPEMAtPath: withKeyPath + "private.pem", passphrase: nil)
 		} catch {
-			print("Private key not found at \(withKeyPath)!")
+			print("Private key not found at \(withKeyPath)")
 		}
 		
 		do {
 			self.pubKey = try AsymmetricKey.makePublicKey(readingPEMAtPath: withKeyPath + "public.pem")
 		} catch {
-			print("Public key not found at \(withKeyPath)!")
+			print("Public key not found at \(withKeyPath)")
 		}
 	}
 	
