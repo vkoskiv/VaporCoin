@@ -65,6 +65,8 @@ Block header:
     vapor build 
     vapor run
 
+	If you are using Xcode, make sure to select `My Mac` as target, and select the `Run` scheme.
+
 ## Difficulty Factor
    To mine a block, you can lower the diffBis amount in Droplet+Setup.swift line 17:
   

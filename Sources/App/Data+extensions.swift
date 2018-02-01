@@ -30,6 +30,7 @@ extension Data {
 
 extension Data {
 	//Some inits I'm not sure are used anywhere?
+	//Found where these are used. In the encoded vars, Data(from: someObj)
 	init<T>(from value: T) {
 		var value = value
 		self.init(buffer: UnsafeBufferPointer(start: &value, count: 1))

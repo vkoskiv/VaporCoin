@@ -29,7 +29,11 @@ class Transaction: NSObject, NSCoding {
 	var txnType: transactionType
 	
 	var txnHash: Data { //Hash of transaction
-		return self.encoded().sha256
+		return self.encoded.sha256
+	}
+	
+	var encoded: Data {
+		return Data(from: value) + from + recipient + Data(from: txnType)
 	}
 	
 	//These are both optional - Coinbase transactions don't need em
@@ -148,9 +152,10 @@ class Transaction: NSObject, NSCoding {
 		return Transaction()
 	}
 	
-	func encoded() -> Data {
+	//Crashes, and not really needed. Replaced by the computed variable in the lass
+	/*func encoded() -> Data {
 		return NSKeyedArchiver.archivedData(withRootObject: self)
-	}
+	}*/
 	
 	//MARK: Swift encoding logic
 	
