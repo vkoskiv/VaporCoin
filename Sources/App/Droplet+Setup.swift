@@ -14,7 +14,7 @@ extension Droplet {
 		
 		if miningEnabled {
 			//Initialize miner
-			let miner = Miner(coinbase: "coinbaseAddressNotImplementedYet", diffBits: 20, threadCount: 4)
+			let miner = Miner(coinbase: "coinbaseAddressNotImplementedYet", diffBits: 14, threadCount: 1)
 			
 			//Craft a new block to test mining with
 			let myGroup = DispatchGroup()
