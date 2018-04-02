@@ -24,6 +24,8 @@ class State: Hashable {
 	//And then only store to DB when we TRUST a  block
 	var blockChain: [Block]
 	
+	var socketQueue: DispatchQueue
+	
 	var clientVersion = 1
 	var clientType    = "hype-fullnode"
 	
@@ -58,6 +60,8 @@ class State: Hashable {
 		print("GenesisBlockHash: \(blockChain.first!.blockHash.hexString)")
 		self.p2pProtocol = P2PProtocol()
 		self.minerProtocol = MinerProtocol()
+		
+		self.socketQueue = DispatchQueue(label: "socks")
 		
 		//Blockchain state params
 		self.currentDifficulty = 1
@@ -125,8 +129,14 @@ class State: Hashable {
 						//Connected
 						//TODO: WebSocket pinging and stuff
 						//Here we query the client for clientVersion, type...
-						let newPeer = PeerState(hostname: hostname, clientVersion: 1, clientType: "eee")
-						state.peers.updateValue(websocket, forKey: newPeer)
+						
+						websocket.onText = { ws, text in
+							let json = try JSON(bytes: text.makeBytes())
+							print(json)
+						}
+						
+						/*let newPeer = PeerState(hostname: hostname, clientVersion: 1, clientType: "eee")
+						state.peers.updateValue(websocket, forKey: newPeer)*/
 					}
 				} catch {
 					print("Failed to connect to \(hostname), error: \(error)")
