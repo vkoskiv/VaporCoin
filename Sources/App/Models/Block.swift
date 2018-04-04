@@ -9,7 +9,7 @@ import Crypto
 import Vapor
 import Foundation
 
-class Block: NSObject, NSCoding {
+class Block {
 	//Block header
 	var prevHash: Data
 	//FIXME: merkleRoot is computed every single time. Find a way to set+store it whenever transactions are altered.
@@ -30,19 +30,14 @@ class Block: NSObject, NSCoding {
 		return Block(prevHash: self.prevHash, depth: self.depth, txns: self.txns, timestamp: self.timestamp, difficulty: self.target, nonce: self.nonce, hash: self.blockHash)
 	}
 	
-	override init() {
-		self.prevHash = Data()
-		self.timestamp = Date().timeIntervalSince1970
-		self.target = 1
-		self.nonce = 0
-		
-		self.depth = 0
-		self.txns = []
-		self.blockHash = Data()
-		
-	}
-	
-	init(prevHash: Data, depth: Int, txns: [Transaction], timestamp: Double, difficulty: Float, nonce: UInt32, hash: Data) {
+	init(prevHash: Data = Data(),
+		 depth: Int = 0,
+		 txns: [Transaction] = [],
+		 timestamp: Double = 0,
+		 difficulty: Float = 0,
+		 nonce: UInt32 = 0,
+		 hash: Data = Data()
+		) {
 		self.prevHash = prevHash
 		self.depth = depth
 		self.txns = txns
@@ -52,35 +47,8 @@ class Block: NSObject, NSCoding {
 		self.blockHash = hash
 	}
 	
-	/*func encoded() -> Data {
-		return NSKeyedArchiver.archivedData(withRootObject: self)
-	}*/
-	
 	var encoded: Data {
 		return prevHash + merkleRoot + Data(from: depth) + Data(from: timestamp) + Data(from: target) + Data(from: nonce)
-	}
-	
-	//MARK: Swift encoding logic
-	public convenience required init?(coder aDecoder: NSCoder) {
-		let prevHash = aDecoder.decodeObject(forKey: "prevHash") as! Data
-		let depth = aDecoder.decodeInteger(forKey: "depth")
-		let txns = aDecoder.decodeObject(forKey: "txns") as! [Transaction]
-		let timestamp = aDecoder.decodeDouble(forKey: "timestamp")
-		let difficulty = aDecoder.decodeFloat(forKey: "difficulty")
-		let nonce = aDecoder.decodeInt32(forKey: "nonce") as! UInt32
-		
-		self.init(prevHash: prevHash, depth: depth, txns: txns, timestamp: timestamp, difficulty: difficulty, nonce: nonce, hash: Data())
-	}
-	
-	func encode(with aCoder: NSCoder) {
-		aCoder.encode(prevHash, forKey: "prevHash")
-		aCoder.encode(merkleRoot, forKey: "merkleRoot")
-		aCoder.encode(timestamp, forKey: "timestamp")
-		aCoder.encode(target, forKey: "target")
-		aCoder.encode(nonce, forKey: "nonce")
-		
-		/*aCoder.encode(depth, forKey: "depth")
-		aCoder.encode(txns, forKey: "txns")*/
 	}
 }
 
