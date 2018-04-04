@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import BigInt
 
 class Miner {
 	
@@ -33,8 +34,9 @@ class Miner {
 		//TODO: Restart miner, with new block. Triggered when updating merkleroot + block received from another node
 	}
 	
-	func mineBlock(block: Block, completion: @escaping (Block) -> Void) {
+	func mine(block: Block, completion: @escaping (Block) -> Void) {
 		block.nonce = 0
+		//Append coinbase txn here
 		block.blockHash = block.encoded.sha256
 		findHash(block: block) { newBlock in
 			completion(newBlock)
@@ -80,7 +82,7 @@ class Miner {
 		}
 	}
 	
-	func blockFound(block: Block) {
+	func found(block: Block) {
 		//Get user-readable date
 		let date = Date(timeIntervalSince1970: block.timestamp)
 		let formatter = DateFormatter()
