@@ -20,7 +20,7 @@ extension Droplet {
 			let myGroup = DispatchGroup()
 			
 			while true {
-				let newBlock = Block(prevHash: state.getPreviousBlock().blockHash, depth: state.blockDepth, txns: [Transaction()], timestamp: Date().timeIntervalSince1970, difficulty: 5000, nonce: 0, hash: Data())
+				let newBlock = Block(prevHash: state.getPreviousBlock().blockHash, depth: state.blockDepth, txns: [Transaction()], timestamp: Date().timeIntervalSince1970, difficulty: 5000, nonce: 0)
 				myGroup.enter()
 				miner.mine(block: newBlock) { foundBlock in
 					miner.found(block: foundBlock) //Update state, print output

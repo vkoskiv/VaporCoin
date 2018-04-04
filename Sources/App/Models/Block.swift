@@ -22,12 +22,13 @@ class Block {
 	
 	var depth: Int
 	var txns: [Transaction]
-	
-	//TODO: Should this be a computed value?
-	var blockHash: Data
+
+	var blockHash: Data {
+		return self.encoded.sha256
+	}
 	
 	func newCopy() -> Block {
-		return Block(prevHash: self.prevHash, depth: self.depth, txns: self.txns, timestamp: self.timestamp, difficulty: self.target, nonce: self.nonce, hash: self.blockHash)
+		return Block(prevHash: self.prevHash, depth: self.depth, txns: self.txns, timestamp: self.timestamp, difficulty: self.target, nonce: self.nonce)
 	}
 	
 	init(prevHash: Data = Data(),
@@ -35,8 +36,7 @@ class Block {
 		 txns: [Transaction] = [],
 		 timestamp: Double = 0,
 		 difficulty: Float = 0,
-		 nonce: UInt32 = 0,
-		 hash: Data = Data()
+		 nonce: UInt32 = 0
 		) {
 		self.prevHash = prevHash
 		self.depth = depth
@@ -44,7 +44,6 @@ class Block {
 		self.timestamp = timestamp
 		self.target = difficulty
 		self.nonce = nonce
-		self.blockHash = hash
 	}
 	
 	var encoded: Data {
@@ -53,7 +52,6 @@ class Block {
 }
 
 func genesisBlock() -> Block {
-	let genesis = Block(prevHash: Data(Bytes(repeatElement(0, count: 32))), depth: 0, txns: [], timestamp: 1505278315, difficulty: 1.0, nonce: 0, hash: Data())
-	genesis.blockHash = genesis.encoded.sha256
+	let genesis = Block(prevHash: Data(Bytes(repeatElement(0, count: 32))), depth: 0, txns: [], timestamp: 1505278315, difficulty: 1.0, nonce: 0)
 	return genesis
 }

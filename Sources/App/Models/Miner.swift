@@ -37,7 +37,6 @@ class Miner {
 	func mine(block: Block, completion: @escaping (Block) -> Void) {
 		block.nonce = 0
 		//Append coinbase txn here
-		block.blockHash = block.encoded.sha256
 		findHash(block: block) { newBlock in
 			completion(newBlock)
 		}
@@ -67,7 +66,6 @@ class Miner {
 			while (!candidate.blockHash.binaryString.hasPrefix(self.diffBits)) {
 				candidate.nonce += 1
 				candidate.timestamp = Date().timeIntervalSince1970
-				candidate.blockHash = candidate.encoded.sha256
 				if blockIsFound {
 					break
 				}
