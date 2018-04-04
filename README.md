@@ -12,7 +12,7 @@
 
 ## Synopsis
 
-Vaporcoin is a simple blockchain ledger implementation, built with Vapor.
+VaporCoin is a simple blockchain transaction ledger implementation, built in Swift using Vapor.
 
 ## Goals
 
@@ -34,7 +34,7 @@ Transactions:
 
 Proof of Work (PoW) algorithm:
 
-- Simplified Bitcoin-style. SHA256 hash of block header
+- Simplified Bitcoin-style. Single SHA256 hash of block header
 
 Block header: 
 - Previous hash
@@ -49,7 +49,7 @@ Block header:
 - Peer discovery
 - Locally hosted web interface to send and receive transactions, change settings and monitor blockchain status.
 - Miner / Implemented, needs work
-- Fractional difficulty adjustment (Swift can't deal with 256bit uints)
+- Fractional difficulty adjustment (Using BigInt)
 - Database logic
 - Proper node syncing
 - ECDSA Signatures, key management (Wallet.swift)
@@ -68,7 +68,7 @@ Block header:
 	If you are using Xcode, make sure to select `My Mac` as target, and select the `Run` scheme.
 
 ## Difficulty Factor
-   To mine a block, you can lower the diffBis amount in Droplet+Setup.swift line 17:
+   To mine a block, you can lower the diffBits amount in Droplet+Setup.swift line 17:
   
 	let miner = Miner(coinbase: "coinbaseAddressNotImplementedYet", diffBits: 20, threadCount: 4)
 
