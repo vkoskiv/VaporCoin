@@ -70,6 +70,14 @@ class Miner {
 					break
 				}
 			}
+
+			/*while (!candidate.isValidDifficulty) {
+				candidate.nonce += 1
+				candidate.timestamp = Date().timeIntervalSince1970
+				if blockIsFound {
+					break
+				}
+			}*/
 			
 			//TODO: Add mutex for this even though it's super unlikely two threads find a hash at the EXACT same time
 			if !blockIsFound {
