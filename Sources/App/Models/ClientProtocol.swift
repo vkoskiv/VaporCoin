@@ -157,10 +157,12 @@ class P2PProtocol {
 	}
 	
 	func broadcastTransaction(txn: Transaction) -> JSON {
+		//TODO
 		return JSON()
 	}
 	
 	func getBlock(depth: Int) -> JSON {
+		//TODO
 		return JSON()
 	}
 	
@@ -204,23 +206,28 @@ class P2PProtocol {
 	}
 	
 	func broadcastBlock(block: Block) {
+		//TODO
 		//Called from receivedBlock after verify. Broadcast to everyone except who this came from
 	}
 	
 	func receivedTransaction(txn: Transaction) -> JSON {
+		//TODO
 		//Check validity, and then add to mempool
 		return JSON()
 	}
 	
+	//TODO: Remove this
 	func test() throws -> JSON { return JSON() }
 	
 	//Block from JSON
 	func blockFromJSON(json: JSON) -> Block {
+		//TODO
 		return Block()
 	}
 	
 	//Transaction from JSON
 	func transactionFromJSON(json: JSON) -> Transaction {
+		//TODO
 		return Transaction()
 	}
 	

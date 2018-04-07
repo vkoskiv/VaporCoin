@@ -99,9 +99,9 @@ extension Block {
 	}
 
 	var isValidDifficulty: Bool {
-		let hashN = BigUInt(Data(from: self.blockHash))
+		let hashNum = BigUInt.init(Data(from: self.blockHash))
 
-		if hashN > BigUInt(2) ^ ( BigUInt(256) - BigUInt(32) ) / BigUInt(state.currentDifficulty) {
+		if hashNum > BigUInt(2) ^ ( BigUInt(256) - BigUInt(32) ) / BigUInt(state.currentDifficulty) {
 			//Block hash is greater than current difficulty requirement
 			return false
 		}
