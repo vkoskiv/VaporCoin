@@ -26,6 +26,10 @@ extension Data {
 	var sha256: Data {
 		return Data(bytes: try! Hash.make(.sha256, self), count: 32)
 	}
+	
+	var ripemd160: Data {
+		return Data(bytes: try! Hash.make(.ripemd160, self), count: 32)
+	}
 }
 
 extension Data {
