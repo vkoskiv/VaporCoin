@@ -16,7 +16,7 @@ class Wallet {
 	
 	//TODO: Make this a calculated value, ripemd160 of pubkey?
 	var address: Data? {
-		return Data()
+		return self.pubKey?.keyData
 	}
 	
 	init(pub: AsymmetricKey, priv: AsymmetricKey) {

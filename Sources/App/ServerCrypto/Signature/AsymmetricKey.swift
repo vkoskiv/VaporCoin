@@ -31,10 +31,21 @@ public enum AsymmetricKey {
 		
 	}
 	
+	//Only expose public key component
+	public var keyData: Data {
+		switch self {
+		case .publicKey(let container):
+			return container.keyData
+		case .privateKey:
+			return Data()
+		}
+	}
+	
 }
 
 /**
 * An object that contains an EVP_PKEY pointer and deallocates it on disposal.
+* Modified on 13.4.2018 by @vkoskiv - Expose public key as Data()
 */
 
 public class EVPKeyContainer {
@@ -44,6 +55,21 @@ public class EVPKeyContainer {
 	
 	public init(wrapping underlyingKeyPointer: UnsafeMutablePointer<EVP_PKEY>) {
 		self.underlyingKeyPointer = underlyingKeyPointer
+	}
+	
+	public var keyData: Data {
+		return pubKeyToData(key: underlyingKeyPointer)
+	}
+	
+	func pubKeyToData(key: UnsafeMutablePointer<EVP_PKEY>) -> Data {
+		let count = i2d_PublicKey(underlyingKeyPointer, nil)
+		var ptr: UnsafeMutablePointer<UInt8>? = UnsafeMutablePointer<UInt8>.allocate(capacity: Int(count))
+		i2d_PublicKey(underlyingKeyPointer, &ptr)
+		//Get data
+		let data = Data(bytes: ptr!, count: Int(count))
+		//Then deallocate ptr
+		free(ptr)
+		return data
 	}
 	
 	deinit {
