@@ -62,11 +62,12 @@ public class EVPKeyContainer {
 	}
 	
 	func pubKeyToData(key: UnsafeMutablePointer<EVP_PKEY>) -> Data {
-		let count = i2d_PublicKey(underlyingKeyPointer, nil)
-		var ptr: UnsafeMutablePointer<UInt8>? = UnsafeMutablePointer<UInt8>.allocate(capacity: Int(count))
-		i2d_PublicKey(underlyingKeyPointer, &ptr)
+		let count = i2d_PublicKey(key, nil)
+		//var ptr: UnsafeMutablePointer<UInt8>? = UnsafeMutablePointer<UInt8>.allocate(capacity: Int(count))
+		let ptr = UnsafeMutablePointer<UnsafeMutablePointer<UInt8>?>.allocate(capacity: 1)
+		i2d_PublicKey(key, &ptr.pointee)
 		//Get data
-		let data = Data(bytes: ptr!, count: Int(count))
+		let data = Data(bytes: ptr.pointee!, count: Int(count))
 		//Then deallocate ptr
 		free(ptr)
 		return data

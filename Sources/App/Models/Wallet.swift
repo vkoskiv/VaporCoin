@@ -14,9 +14,12 @@ class Wallet {
 	var pubKey: AsymmetricKey? = nil
 	var privKey: AsymmetricKey? = nil
 	
-	//TODO: Make this a calculated value, ripemd160 of pubkey?
 	var address: Data? {
-		return self.pubKey?.keyData
+		return self.pubKey?.keyData.ripemd160
+	}
+	
+	var readableAddress: String? {
+		return self.address?.base58
 	}
 	
 	init(pub: AsymmetricKey, priv: AsymmetricKey) {
@@ -44,6 +47,10 @@ class Wallet {
 			self.pubKey = try AsymmetricKey.makePublicKey(readingPEMAtPath: withKeyPath + "public.pem")
 		} catch {
 			print("Public key not found at \(withKeyPath)")
+		}
+		
+		if self.pubKey != nil && self.privKey != nil {
+			print("Keys loaded")
 		}
 	}
 	

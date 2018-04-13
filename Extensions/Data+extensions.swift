@@ -33,6 +33,12 @@ extension Data {
 }
 
 extension Data {
+	//Base58 extension
+	
+	
+}
+
+extension Data {
 	//Some inits I'm not sure are used anywhere?
 	//Found where these are used. In the encoded vars, Data(from: someObj)
 	init<T>(from value: T) {
