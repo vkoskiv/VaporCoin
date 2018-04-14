@@ -10,24 +10,54 @@ import BigInt
 
 class Miner {
 	
-	//static let shared = Miner()
-	
 	//Address
 	var coinbase: String
-	var diffBits: String
 	
 	//Mining params
 	var nonce: Int32 = 0
 	var timeStamp: Double = Date().timeIntervalSince1970
+	var diffBits: String
 	
 	//Hardware params
 	var threadCount: Int = 1
 	
+	//Current miner status
+	private var _mining: Bool = false
+	var isMining: Bool {
+		set {
+			_mining = newValue
+			//Start miner
+			if newValue {
+				start()
+			}
+		}
+		get {
+			return _mining
+		}
+	}
+	
+	//Run in background using dispatch group
+	var background: DispatchGroup
+	
 	init(coinbase: String, diffBits: Int, threadCount: Int) {
-		print("Starting VaporCoin miner with \(threadCount) threads and a difficulty of \(diffBits) bits")
+		print("Initializing VaporCoin miner with \(threadCount) threads and a difficulty of \(diffBits) bits")
 		self.coinbase = coinbase
 		self.diffBits = String(repeatElement("0", count: diffBits))
 		self.threadCount = threadCount
+		self.background = DispatchGroup()
+	}
+	
+	func start() {
+		print("Starting miner...")
+		while _mining {
+			let newBlock = Block(prevHash: state.getPreviousBlock().blockHash, depth: state.blockDepth, txns: [Transaction()], timestamp: Date().timeIntervalSince1970, difficulty: 5000, nonce: 0)
+			background.enter()
+			self.mine(block: newBlock) { foundBlock in
+				self.found(block: foundBlock)
+				self.background.leave()
+			}
+			background.wait()
+		}
 	}
 	
 	func restart() {

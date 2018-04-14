@@ -70,6 +70,10 @@ class State: Hashable {
 		
 		self.clientWallet = Wallet(withKeyPath: "/path/to/your/keys/")
 		
+		if let address = self.clientWallet?.readableAddress {
+			print("Your address is: \(address)")
+		}
+		
 		//self.initConnections()
 		
 		//Set up initial client conns
@@ -81,18 +85,6 @@ class State: Hashable {
 		//Start syncing on a background thread
 		/*DispatchQueue.global(qos: .background).async {
 			
-		}*/
-		
-		/*var pubKey: CryptoKey
-		var privKey: CryptoKey
-		do {
-			print("Loading crypto keys")
-			pubKey = try CryptoKey(path: "/Users/vkoskiv/coinkeys/public.pem", component: .publicKey)
-			privKey = try CryptoKey(path: "/Users/vkoskiv/coinkeys/private.pem", component: .privateKey(passphrase:nil))
-			
-			self.signature = ClientSignature(pub: pubKey, priv: privKey)
-		} catch {
-			print("Crypto keys not found!")
 		}*/
 	}
 	
