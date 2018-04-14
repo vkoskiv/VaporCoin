@@ -30,7 +30,7 @@ class State: Hashable {
 	var clientType    = "hype-fullnode"
 	
 	//This is the wallet of this client. Only one for now.
-	var clientWallet: Wallet? = nil
+	var wallet: Wallet? = nil
 
 	var p2pProtocol: P2PProtocol
 	var minerProtocol: MinerProtocol
@@ -68,9 +68,9 @@ class State: Hashable {
 		self.blocksSinceDifficultyUpdate = 1
 		self.blockDepth = 1
 		
-		self.clientWallet = Wallet(withKeyPath: "/path/to/your/keys/")
+		self.wallet = Wallet(withKeyPath: "/Users/vkoskiv/coinkeys/")
 		
-		if let address = self.clientWallet?.readableAddress {
+		if let address = self.wallet?.readableAddress {
 			print("Your address is: \(address)")
 		}
 		

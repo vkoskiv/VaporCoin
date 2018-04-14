@@ -24,8 +24,8 @@ extension Droplet {
 			}
 		}
 		
-		//Socket for lite clients
-		socket("lite") { message, webSocket in
+		//Socket for light clients
+		socket("light") { message, webSocket in
 			webSocket.onText = { ws, text in
 				
 			}
