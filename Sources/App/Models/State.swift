@@ -16,8 +16,9 @@ class State: Hashable {
 	var peers: [PeerState: WebSocket]
 	//Known hostnames
 	var knownHosts: [String]
+	
 	//Pool of pending transactions to be processed
-	var memPool: [Transaction]
+	var memPool: MemPool
 	
 	//For now, just a in-memory array.
 	//Eventually have an in-memory queue of an array of arrays of blocks
@@ -54,7 +55,7 @@ class State: Hashable {
 		//self.knownHosts.append("proteus.vkoskiv.com")
 		//self.knownHosts.append("triton.vkoskiv.com")
 		
-		self.memPool = []
+		self.memPool = MemPool()
 		self.blockChain = []
 		self.blockChain.append(genesisBlock())
 		print("GenesisBlockHash: \(blockChain.first!.blockHash.hexString)")

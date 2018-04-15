@@ -182,9 +182,7 @@ class P2PProtocol {
 		if block.verify() {
 			print("Block \(block.blockHash) (\(block.depth)) valid!")
 			//Remove block transactions from mempool, as they've been processed already.
-			for tx in block.txns {
-				state.memPool = state.memPool.filter { $0 != tx}
-			}
+			state.memPool.remove(txns: block.txns)
 			print("Removed \(block.txns.count) transactions from mempool")
 			
 			//Block is valid, append

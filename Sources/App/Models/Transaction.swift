@@ -91,6 +91,7 @@ class Transaction: Equatable {
 		return Transaction()
 	}
 
+	//TODO: Move to BlockChain.swift
 	func getInputs(forOwner: Wallet, forAmount: Int64) -> [Transaction] {
 		//Get inputs
 		//Then map filter out ones that have been spent
@@ -133,6 +134,7 @@ class Transaction: Equatable {
 		return [Transaction()]
 	}
 
+	//TODO: Move to BlockChain.swift
 	func getTransactionWith(hash: Data) -> Transaction {
 		for block in state.blockChain {
 			for txn in block.txns {
