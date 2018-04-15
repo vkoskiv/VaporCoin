@@ -6,7 +6,7 @@
     	<img src="https://travis-ci.org/vapor/api-template.svg?branch=master" alt="Build Status">
     </a>
     <a href="https://swift.org">
-        <img src="http://img.shields.io/badge/swift-3.1-brightgreen.svg" alt="Swift 3.1">
+        <img src="http://img.shields.io/badge/swift-4-brightgreen.svg" alt="Swift 4">
     </a>
 </center>
 

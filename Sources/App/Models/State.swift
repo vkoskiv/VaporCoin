@@ -31,6 +31,7 @@ class State: Hashable {
 	var clientType    = "hype-fullnode"
 	
 	//This is the wallet of this client. Only one for now.
+	//Once we add wallet generation, we can add support for multiple Wallets.
 	var wallet: Wallet? = nil
 
 	var p2pProtocol: P2PProtocol
