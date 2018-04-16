@@ -49,11 +49,9 @@ Block header:
 - JSON WebSocket p2p communication / Incomplete
 - Peer discovery
 - Locally hosted web interface to send and receive transactions, change settings and monitor blockchain status.
-- Miner / Implemented, needs work
 - Fractional difficulty adjustment (Using BigInt)
 - Database logic
 - Proper node syncing
-- ECDSA Signatures, key management (Wallet.swift)
 - UTXO Transactions
 - Establish consensus
 

@@ -8,17 +8,19 @@
 import Foundation
 import BigInt
 
-let maxTransactionTimeDeviation: Double = 300 //5 minutes
-let maxBlockTimeDeviation: Double = 1800 //30 minutes
-
-//Maximum transactions per block
-let maxTxnsPerBlock: Int = 6000
-
-//Maximum time deviation for a block header/txn timestamp
-let maxTimeDeviation: Int = 300 //5 minutes
-
-//Minimum number of blocks before a coinbase transaction can be spent
-let coinbaseMaturity: Int = 50
+struct Consensus {
+	static let maxTransactionTimeDeviation: Double = 300 //5 minutes
+	static let maxBlockTimeDeviation: Double = 1800 //30 minutes
+	
+	//Maximum transactions per block
+	static let maxTxnsPerBlock: Int = 6000
+	
+	//Maximum time deviation for a block header/txn timestamp
+	static let maxTimeDeviation: Double = 300 //5 minutes
+	
+	//Minimum number of blocks before a coinbase transaction can be spent
+	static let coinbaseMaturity: Int = 50
+}
 
 /*
 In this file, funcs for verifying everything.
@@ -58,9 +60,27 @@ extension Block {
 	func verify() -> Bool {
 		//Verify the validity of a block
 		//Check that the reported hash matches
-		let testHash = self.encoded.sha256
-		if self.blockHash != testHash {
+		if self.blockHash != self.sha256 {
 			print("Block hash doesn't match")
+			return false
+		}
+		
+		//Verify prevHash
+		if self.prevHash != state.getLatestBlock().blockHash {
+			print("New block prevHash doesn't match existing blockchain")
+			return false
+		}
+		
+		//Verify merkle root
+		if self.merkleRoot != MerkleRoot.getRootHash(fromTransactions: self.txns) {
+			print("Merkle root hash is invalid!")
+			return false
+		}
+		
+		//Verify block number
+		if self.depth < state.blockDepth {
+			print("Block depth is less than what's already present.")
+			//TODO: Handle "uncle" blocks
 			return false
 		}
 		
@@ -84,13 +104,12 @@ extension Block {
 		
 		//Check timestamp
 		let currentTime: Double = Double(Date().timeIntervalSince1970)
-		let maxTimeDeviation: Double = 1800 // 30 minutes
-		if self.timestamp < (currentTime - maxTimeDeviation) {
-			//Block timestamp more than 30min in past
+		if self.timestamp < (currentTime - Consensus.maxTimeDeviation) {
+			//Block timestamp more than 5min in past
 			return false
 		}
-		if self.timestamp > (currentTime + maxTimeDeviation) {
-			//Block timestamp more than 30min in future
+		if self.timestamp > (currentTime + Consensus.maxTimeDeviation) {
+			//Block timestamp more than 5min in future
 			return false
 		}
 		

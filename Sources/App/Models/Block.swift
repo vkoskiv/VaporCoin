@@ -33,6 +33,10 @@ class Block {
 		return prevHash + merkleRoot + Data(from: depth) + Data(from: timestamp) + Data(from: target) + Data(from: nonce)
 	}
 	
+	var sha256: Data {
+		return self.encoded.sha256
+	}
+	
 	func newCopy() -> Block {
 		return Block(prevHash: self.prevHash, depth: self.depth, txns: self.txns, timestamp: self.timestamp, difficulty: self.target, nonce: self.nonce)
 	}
