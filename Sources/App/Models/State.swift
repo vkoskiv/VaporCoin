@@ -20,10 +20,7 @@ class State: Hashable {
 	//Pool of pending transactions to be processed
 	var memPool: MemPool
 	
-	//For now, just a in-memory array.
-	//Eventually have an in-memory queue of an array of arrays of blocks
-	//And then only store to DB when we TRUST a  block
-	var blockChain: [Block]
+	var blockChain: BlockChain
 	
 	var socketQueue: DispatchQueue
 	
@@ -43,9 +40,9 @@ class State: Hashable {
 	
 	let version: Int = 1
 	
+	//Move these to a consensus structure
 	var currentDifficulty: Int64
 	var blocksSinceDifficultyUpdate: Int
-	var blockDepth: Int
 	
 	init() {
 		print("Initializing client state")
@@ -57,9 +54,11 @@ class State: Hashable {
 		//self.knownHosts.append("triton.vkoskiv.com")
 		
 		self.memPool = MemPool()
-		self.blockChain = []
-		self.blockChain.append(genesisBlock())
-		print("GenesisBlockHash: \(blockChain.first!.blockHash.hexString)")
+		
+		self.blockChain = BlockChain()
+		
+		print("GenesisBlockHash: \(blockChain.getLatestBlock().blockHash.hexString)")
+		
 		self.p2pProtocol = P2PProtocol()
 		self.minerProtocol = MinerProtocol()
 		
@@ -68,7 +67,6 @@ class State: Hashable {
 		//Blockchain state params
 		self.currentDifficulty = 1
 		self.blocksSinceDifficultyUpdate = 1
-		self.blockDepth = 1
 		
 		self.wallet = Wallet(withKeyPath: "/Users/vkoskiv/coinkeys/")
 		
@@ -92,7 +90,7 @@ class State: Hashable {
 	
 	func startSync() {
 		//Query other nodes for blockchain status, and then sync until latest block
-		print("Starting background sync, from block \(state.blockDepth)")
+		print("Starting background sync, from block \(state.blockChain.depth)")
 		self.p2pProtocol.sendRequest(request: .getBlock, to: nil, 0)
 	}
 	
@@ -146,35 +144,10 @@ class State: Hashable {
 		return self.version
 	}
 	
-	//MARK: Interact with blockchain
-	func getBlockWithHash(hash: Data) -> Block {
-		let blocks = self.blockChain.filter { $0.blockHash == hash }
-		if blocks.count > 1 {
-			print("Found more than 1 block with this hash. Yer blockchain's fucked.")
-			return Block()
-		} else if blocks.count < 1 {
-			print("Found less than 1 block with this hash.")
-			return Block()
-		}
-		return blocks.first!
-	}
-	
-	func getPreviousBlock() -> Block {
-		return self.blockChain[self.blockDepth - 1]
-	}
-	
-	func getBlockWithIndex(idx: Int) -> Block {
-		return self.blockChain[idx]
-	}
-	
-	func getLatestBlock() -> Block {
-		return self.blockChain.last!
-	}
-	
 	func updateDifficulty() {
 		//Look at how long last 60 blocks took, and update difficulty
-		let startTime = self.blockChain[self.blockChain.endIndex - 60].timestamp
-		let timeDiff = self.blockChain.last!.timestamp - startTime
+		let startTime = self.blockChain.getBlockWith(index: self.blockChain.depth - 60).timestamp
+		let timeDiff = self.blockChain.getLatestBlock().timestamp - startTime
 		print("Last 60 blocks took \(timeDiff)s, target is 3600s")
 		//Target is 3600s (1 hour)
 		print("Difficulty before: \(self.currentDifficulty)")

@@ -9,7 +9,7 @@ extension Droplet {
 		try setupRoutes()
 		
 		//For now init state by reading value from there.
-		print("BlockChain count: \(state.blockChain.count)")
+		print("BlockChain count: \(state.blockChain.depth)")
 		
 		let miner = Miner(coinbase: "notImplemented", diffBits: 14, threadCount: 1)
 		miner.isMining = false

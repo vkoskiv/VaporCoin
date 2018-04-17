@@ -106,7 +106,7 @@ class Transaction: Equatable {
 		var allAvailableTransactions: [Transaction] = []
 
 		//Get all past input transactions of the sender
-		for block in state.blockChain {
+		/*for block in state.blockChain {
 			for txn in block.txns {
 				if txn.recipient == forOwner.address {
 					allAvailableTransactions.append(txn)
@@ -121,7 +121,7 @@ class Transaction: Equatable {
 
 				}
 			}
-		}
+		}*/
 
 		/*for block in state.blockChain {
 		for txn in block.txns {
@@ -136,13 +136,13 @@ class Transaction: Equatable {
 
 	//TODO: Move to BlockChain.swift
 	func getTransactionWith(hash: Data) -> Transaction {
-		for block in state.blockChain {
+		/*for block in state.blockChain {
 			for txn in block.txns {
 				if txn.txnHash == hash {
 					return txn
 				}
 			}
-		}
+		}*/
 		print("no txn found with \(hash)")
 		return Transaction()
 	}

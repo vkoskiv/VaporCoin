@@ -1,18 +1,20 @@
 import Vapor
 
+/*
+This is Vapor's HTTP routing.
+We use it for WebSockets, and the local HTTP interface.
+*/
+
 extension Droplet {
     func setupRoutes() throws {
 		//Set up routes
 		get("peers") { req in
-			return "\(state.blockChain.count)"
+			return "\(state.blockChain.depth)"
 		}
 		
 		post("addPeer") { req in
 			return "Send a new peer here so I can add it!"
 		}
-		
-		//NOTE: We will use JSON-RPC over TCP, instead of WebSockets.
-		//Newer note: We will use WebSockets after all
 		
 		//Set up webSockets
 		//Special WebSocket for a miner connection

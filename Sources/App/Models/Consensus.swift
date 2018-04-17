@@ -35,7 +35,7 @@ extension Transaction {
 		//Figure out current block reward
 		//Block reward is halved every 2 102 400 blocks
 		
-		let divCount: Int = state.blockDepth / 2_102_400
+		let divCount: Int = state.blockChain.depth / 2_102_400
 		
 		for _ in 0..<divCount {
 			fullAmount /= 2
@@ -58,6 +58,7 @@ extension Transaction {
 //Block verification
 extension Block {
 	func verify() -> Bool {
+		
 		//Verify the validity of a block
 		//Check that the reported hash matches
 		if self.blockHash != self.sha256 {
@@ -66,7 +67,7 @@ extension Block {
 		}
 		
 		//Verify prevHash
-		if self.prevHash != state.getLatestBlock().blockHash {
+		if self.prevHash != state.blockChain.getLatestBlock().blockHash {
 			print("New block prevHash doesn't match existing blockchain")
 			return false
 		}
@@ -78,7 +79,7 @@ extension Block {
 		}
 		
 		//Verify block number
-		if self.depth < state.blockDepth {
+		if self.depth < state.blockChain.depth {
 			print("Block depth is less than what's already present.")
 			//TODO: Handle "uncle" blocks
 			return false

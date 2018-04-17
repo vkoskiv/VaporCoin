@@ -50,7 +50,7 @@ class Miner {
 	func start() {
 		print("Starting miner...")
 		while _mining {
-			let newBlock = Block(prevHash: state.getPreviousBlock().blockHash, depth: state.blockDepth, txns: [Transaction()], timestamp: Date().timeIntervalSince1970, difficulty: 5000, nonce: 0)
+			let newBlock = Block(prevHash: state.blockChain.getPreviousBlock().blockHash, depth: state.blockChain.depth, txns: [Transaction()], timestamp: Date().timeIntervalSince1970, difficulty: 5000, nonce: 0)
 			background.enter()
 			self.mine(block: newBlock) { foundBlock in
 				self.found(block: foundBlock)
@@ -134,7 +134,6 @@ class Miner {
 		print("targetDiff: \(block.target)\n")
 		
 		//Update state
-		state.blockDepth += 1
 		state.blocksSinceDifficultyUpdate += 1
 		//And just add block for now
 		//TODO: Broadcast block, do checks, and a ton of other stuffs
