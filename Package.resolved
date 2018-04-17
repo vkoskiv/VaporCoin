@@ -11,30 +11,12 @@
         }
       },
       {
-        "package": "BigInt",
-        "repositoryURL": "https://github.com/attaswift/BigInt.git",
-        "state": {
-          "branch": null,
-          "revision": "557d7e0e15f8693436212594a726af1795488550",
-          "version": "3.0.2"
-        }
-      },
-      {
         "package": "Bits",
         "repositoryURL": "https://github.com/vapor/bits.git",
         "state": {
           "branch": null,
           "revision": "c32f5e6ae2007dccd21a92b7e33eba842dd80d2f",
           "version": "1.1.0"
-        }
-      },
-      {
-        "package": "CTLS",
-        "repositoryURL": "https://github.com/vapor/ctls.git",
-        "state": {
-          "branch": null,
-          "revision": "fba1297f4986a4dac8b02f7ac4e84a77fd492e4c",
-          "version": "1.1.3"
         }
       },
       {
@@ -62,6 +44,15 @@
           "branch": null,
           "revision": "946edc6642d6825982a2f52a268a8ba9bd520a3d",
           "version": "2.1.2"
+        }
+      },
+      {
+        "package": "CTLS",
+        "repositoryURL": "https://github.com/vapor/ctls.git",
+        "state": {
+          "branch": null,
+          "revision": "fba1297f4986a4dac8b02f7ac4e84a77fd492e4c",
+          "version": "1.1.3"
         }
       },
       {
@@ -146,30 +137,21 @@
         }
       },
       {
+        "package": "Sockets",
+        "repositoryURL": "https://github.com/vapor/sockets.git",
+        "state": {
+          "branch": null,
+          "revision": "79fc180cdcb451dbbb01b1156be36720adde80e0",
+          "version": "2.2.3"
+        }
+      },
+      {
         "package": "SQLite",
         "repositoryURL": "https://github.com/vapor/sqlite.git",
         "state": {
           "branch": null,
           "revision": "9aceb6a0d7b1698a557647493bd78b030dad468b",
           "version": "2.3.1"
-        }
-      },
-      {
-        "package": "SipHash",
-        "repositoryURL": "https://github.com/attaswift/SipHash",
-        "state": {
-          "branch": null,
-          "revision": "7b47e3f23a66770b1eb18e15e20546aad398c9dd",
-          "version": "1.2.0"
-        }
-      },
-      {
-        "package": "Sockets",
-        "repositoryURL": "https://github.com/vapor/sockets.git",
-        "state": {
-          "branch": null,
-          "revision": "a77816695630a44d5d1393fc71eac37ac3d082ca",
-          "version": "2.2.2"
         }
       },
       {
