@@ -86,13 +86,14 @@ extension Block {
 		
 		//Check that hash is valid (Matches difficulty)
 		//FIXME: This is a bit of a hack
-		if let hashNum = UInt256(data: NSData(data: self.blockHash)) {
+		//FIXME: We're bypassing this due to lack of working division with UInt256 :(
+		/*if let hashNum = UInt256(data: NSData(data: self.blockHash)) {
 			//HASH < 2^(256-minDifficulty) / currentDifficulty
 			if hashNum > (UInt256.max - UInt256(32)) / UInt256(state.currentDifficulty) {
 				//Block hash doesn't match current difficulty
 				return false
 			}
-		}
+		}*/
 
 		//This is the new BigInt implementation. Old UInt256 doesn't support / !
 		/*let hashN = BigUInt(Data(from: self.blockHash))

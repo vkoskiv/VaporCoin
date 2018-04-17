@@ -28,6 +28,8 @@ class BlockChain {
 		if block.verify() {
 			self.chain.append(block)
 			self.depth += 1
+		} else {
+			print("Rejected block \(block.blockHash.hexString)")
 		}
 	}
 	
