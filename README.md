@@ -1,4 +1,4 @@
-[![VaporCoin](https://teensyimg.com/images/gL5iRKDbH4.jpg)](https://github.com/VKoskiv/VaporCoin)
+[![VaporCoin](https://teensyimg.com/images/wqVmE4nCp.png)](https://github.com/VKoskiv/VaporCoin)
 <p align="center">
     <a href="LICENSE">
         <img src="http://img.shields.io/badge/license-MIT-brightgreen.svg" alt="MIT License">
