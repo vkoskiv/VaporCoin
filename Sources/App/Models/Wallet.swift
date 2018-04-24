@@ -14,6 +14,8 @@ class Wallet {
 	var pubKey: AsymmetricKey? = nil
 	var privKey: AsymmetricKey? = nil
 	
+	var nonce: UInt64
+	
 	var address: Data? {
 		return self.pubKey?.keyData.ripemd160
 	}
@@ -25,14 +27,19 @@ class Wallet {
 	init(pub: AsymmetricKey, priv: AsymmetricKey) {
 		self.pubKey = pub
 		self.privKey = priv
+		self.nonce = 0
 	}
 	
 	init() {
 		self.pubKey = nil
 		self.privKey = nil
+		self.nonce = 0
 	}
 	
 	init(withKeyPath: String) {
+		//TODO: Fetch from blockchain
+		self.nonce = 0
+		
 		//Try and load up the keypair into memory
 		print("Loading keypair")
 		print("Looking for keys in \(withKeyPath)")

@@ -22,6 +22,8 @@ class Transaction: Equatable {
 	// 100,000,000 = 1.0 VaporCoins (8 decimal places)
 
 	var value: Int64
+	
+	var nonce: UInt64
 
 	var from: Data
 	var recipient: Data
@@ -46,6 +48,7 @@ class Transaction: Equatable {
 	}
 
 	init(value: Int64 = 0,
+		 nonce: UInt64 = 0,
 		 from: Data = Data(),
 		 recipient: Data = Data(),
 		 txnType: transactionType = .normal,
@@ -53,6 +56,8 @@ class Transaction: Equatable {
 		 senderPubKey: AsymmetricKey? = nil
 		) {
 		self.value = value
+		
+		self.nonce = nonce
 
 		self.from = from
 		self.recipient = recipient
