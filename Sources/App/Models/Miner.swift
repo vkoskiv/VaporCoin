@@ -129,6 +129,7 @@ class Miner {
 		print("nonce     : \(block.nonce)")
 		print("depth     : \(block.depth)")
 		print("merkleRoot: \(block.merkleRoot.hexString)")
+		print("txns      : \(block.txns.count)")
 		print("timestamp : \(block.timestamp) (\(dateString))")
 		print("targetDiff: \(block.target)\n")
 		
